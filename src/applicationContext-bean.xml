@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName"
+			value="com.mysql.jdbc.Driver">
+		</property>
+		<property name="url"
+			value="jdbc:mysql://60.205.217.40:3306/dianxin?useUnicode=true&amp;characterEncoding=UTF-8">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value="hiyouth_3"></property>
+	</bean>
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+
+		<property name="hibernateProperties">
+
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.MySQLDialect
+				</prop>
+				
+			</props>
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>com/vo/Setmeal.hbm.xml</value>
+				<value>com/vo/Records.hbm.xml</value>
+				<value>com/vo/Recharge.hbm.xml</value>
+				<value>com/vo/UserandGroup.hbm.xml</value>
+				<value>com/vo/UserGroup.hbm.xml</value>
+				<value>com/vo/Userinfo.hbm.xml</value>
+				</list>
+		</property>
+		<!--<property name="hibernate.hbm2ddl.auto"></property>-->
+	</bean>
+
+
+	<bean id="userinfoDao" class="com.dao.UserinfoDao" scope="prototype">
+	<property name="sessionFactory">
+	<ref bean="sessionFactory" />
+	</property>
+	</bean>
+	<bean id="usergroupDao" class="com.dao.UserGroupDao" scope="prototype">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="billDao" class="com.dao.BillDao" scope="prototype">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="setmealDao" class="com.dao.SetmealDao" scope="prototype">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<!-- IOC Service -->
+	<bean id="userinfoService" class="com.service.UserinfoService" scope="prototype">
+	<property name="userinfoDao" ref="userinfoDao" />
+	</bean>
+	<bean id="usergroupService" class="com.service.GroupService" scope="prototype">
+		<property name="userGroupDao" ref="usergroupDao" />
+		<property name="userinfoDao" ref="userinfoDao" />
+	</bean>
+	<bean id="billService" class="com.service.BillService" scope="prototype">
+		<property name="billDao" ref="billDao" />
+	</bean>
+	<bean id="setmealService" class="com.service.SetmealService" scope="prototype">
+		<property name="setmealDao" ref="setmealDao" />
+	</bean>
+	<bean id="callService" class="com.service.CallService" scope="prototype">
+		<property name="billDao" ref="billDao" />
+		<property name="userGroupDao" ref="usergroupDao" />
+		<property name="userinfoDao" ref="userinfoDao" />
+	</bean>
+	 <!-- IOC Action -->
+	<bean id="groupAction" class="com.action.GroupAction"  scope="prototype">
+	<property name="groupService" ref="usergroupService"></property>
+	</bean>
+	<bean id="setmealAction" class="com.action.SetmealAction" scope="prototype">
+		<property name="setmealService" ref="setmealService"></property>
+	</bean>
+	<bean id="userinfoAction" class="com.action.UserinfoAction"  scope="prototype">
+		<property name="userinfoService" ref="userinfoService"></property>
+	</bean>
+	<bean id="billAction" class="com.action.BillAction"  scope="prototype">
+		<property name="billService" ref="billService"></property>
+	</bean>
+	<!--<bean id="chat" class="com.websocket.Chat"  scope="prototype">-->
+		<!--<property name="callService" ref="callService"></property>-->
+	<!--</bean>-->
+	
+	
+	
+	</beans>

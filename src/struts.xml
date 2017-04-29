@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+  <struts>
+	<!-- 防止Struts2 的 FilterDispatcher 和 自定义过滤器引发冲突 -->
+	<constant name="struts.action.extension" value="action"></constant>
+	<constant name="objectFactory" value="spring"></constant>
+    <constant name="struts.i18n.encoding" value="utf-8" />
+	<!--websocket配置过滤-->
+	<constant name="struts.action.excludePattern" value="/ws/.*,ws://.*"></constant>
+
+	<package name="struts" extends="struts-default" namespace="/">
+
+
+		<action name="userinfo" class="userinfoAction">
+		</action>
+		<action name="bill" class="billAction">
+		</action>
+		<action name="setmeal" class="setmealAction">
+		</action>
+
+		<action name="group" class="groupAction">
+			<!--<result name="ok">/adminIndex.jsp</result>-->
+			<!--<result name="error">/adminIndex.jsp</result>-->
+			<!--<result name="finish">/adminIndex.jsp</result>-->
+		</action>
+ 
+ 		<!--<action name="bill" class="billAction">-->
+			<!--<result name="bills">/MyBill.jsp</result>-->
+			<!--<result name="callSuccess">/onlineCall/CallSuccess.jsp</result>-->
+		<!--</action>-->
+
+ 		<!--<action name="user" class="usersAction">-->
+			<!--<result name="oneUser">/userInfo.jsp</result>-->
+			<!--<result name="error">/index.jsp</result>-->
+			<!--<result name="select">/jiaofeinext.jsp</result>-->
+         <!--<result name="update">/jiaofeithree.jsp</result>-->
+         <!--<result name="ok">/addUserOk.jsp</result>-->
+		<!--<result name="usersList">/userDelete.jsp</result>-->
+		<!--<result name="checked">/onlineCall/Calling.jsp</result>-->
+		<!--</action>-->
+
+
+		 <!--<action name="usersnum"  class="usersnumAction">-->
+		<!--<result name="usersNum">/showUsersNum.jsp</result>-->
+		<!--</action>-->
+
+
+ 		<!--<action name="business" class="businessAction">-->
+		<!--<result name="selectAll">/updatebusiness.jsp</result>-->
+		<!--<result name="updatebusiness">/updatebusiness1.jsp</result>-->
+		<!--<result name="businessList">/business.jsp</result>-->
+		<!--<result name="busList">/business.jsp</result>-->
+		<!--<result name="showBusiness">/upbusiness.jsp</result>-->
+		<!--<result name="savesuccess">/savebusiness.jsp</result>-->
+		<!--</action>-->
+		<!---->
+		
+		
+		
+  </package>
+ 
+	
+</struts>    
