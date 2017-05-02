@@ -18,7 +18,9 @@ public class CORSFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
         /*支持全域名访问*/
-        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:9002");
+        String referer = httpResponse.getHeader("Referer");
+        System.out.println(referer+"  访问域名");
+        httpResponse.setHeader("Access-Control-Allow-Origin", referer);
 //        httpResponse.setHeader("Access-Control-Allow-Headers", "*");
 //        httpResponse.setHeader("Access-Control-Allow-Methods", "*");
 
