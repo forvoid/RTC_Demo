@@ -35,6 +35,7 @@ public class SetmealAction extends ActionSupport {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("id",setmeal.getId());
                 jsonObject.put("price",setmeal.getPrice());
+                jsonObject.put("name",setmeal.getName());
                 jsonObject.put("total",setmeal.getTotal());
                 jsonObject.put("desc",setmeal.getDesc());
                 jsonObject.put("inserttime",setmeal.getInserttime());
@@ -45,7 +46,19 @@ public class SetmealAction extends ActionSupport {
             UserinfoAction.write(JSONUtil.getJSONObject(-1,"数据为空"));
         }
     }
-
+    /**查看单个套餐*/
+    public void findById(){
+        String id = ServletActionContext.getRequest().getParameter("id");
+        Setmeal setmeal = setmealService.findById(Integer.parseInt(id));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id",setmeal.getId());
+        jsonObject.put("price",setmeal.getPrice());
+        jsonObject.put("name",setmeal.getName());
+        jsonObject.put("total",setmeal.getTotal());
+        jsonObject.put("desc",setmeal.getDesc());
+        jsonObject.put("inserttime",setmeal.getInserttime());
+        UserinfoAction.write(JSONUtil.getJSONObject(0,"数据获取成功",jsonObject));
+    }
     /**修改套餐套餐*/
     public void updateSetmeal(){
         String id = ServletActionContext.getRequest().getParameter("id");

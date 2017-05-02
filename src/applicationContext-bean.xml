@@ -99,6 +99,7 @@
 	</bean>
 	<bean id="userinfoAction" class="com.action.UserinfoAction"  scope="prototype">
 		<property name="userinfoService" ref="userinfoService"></property>
+		<property name="setmealService" ref="setmealService"></property>
 	</bean>
 	<bean id="billAction" class="com.action.BillAction"  scope="prototype">
 		<property name="billService" ref="billService"></property>

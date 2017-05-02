@@ -12,7 +12,17 @@ public class Userinfo {
     private String password;
     private String addr;
     private Date insertTime;
-    private int pkgid;
+
+    public int getSetmealid() {
+        return setmealid;
+    }
+
+    public void setSetmealid(int setmealid) {
+        this.setmealid = setmealid;
+    }
+
+    //    private int pkgid;
+    private int setmealid;
 
     public Userinfo() {
     }
@@ -24,14 +34,16 @@ public class Userinfo {
         this.password = password;
         this.addr = addr;
         this.insertTime = insertTime;
+
     }
 
-    public Userinfo(String username, String realname, String password, String addr) {
+    public Userinfo(String username, String realname, String password, String addr, int setmealid) {
         this.username = username;
         this.realname = realname;
         this.password = password;
         this.addr = addr;
         this.insertTime = new Date();
+        this.setmealid = setmealid;
     }
 
     public int getId() {

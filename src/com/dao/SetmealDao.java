@@ -33,5 +33,15 @@ public class SetmealDao extends HibernateDaoSupport {
         String queryString = "from Setmeal as model ";
         return getHibernateTemplate().find(queryString);
     }
+    public Setmeal findById(Integer id) {
+        try {
+            Setmeal instance = (Setmeal) getHibernateTemplate().get(
+                    "com.vo.Setmeal", id);
+            return instance;
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+        }
+        return null;
+    }
 
 }

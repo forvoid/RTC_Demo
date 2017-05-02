@@ -1,8 +1,10 @@
 package com.action;
 
 import com.alibaba.fastjson.JSONObject;
+import com.service.SetmealService;
 import com.service.UserinfoService;
 import com.util.JSONUtil;
+import com.vo.Setmeal;
 import com.vo.Userinfo;
 import org.apache.struts2.ServletActionContext;
 
@@ -19,7 +21,12 @@ import java.util.List;
 public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
     private HttpSession session;
     private UserinfoService userinfoService;
-//
+    private SetmealService setmealService;
+
+    public void setSetmealService(SetmealService setmealService) {
+        this.setmealService = setmealService;
+    }
+    //
     /**
      * 用户注册
      * */
@@ -30,8 +37,9 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
             String realname = ServletActionContext.getRequest().getParameter("realname");
             String password = ServletActionContext.getRequest().getParameter("password");
             String addr = ServletActionContext.getRequest().getParameter("addr");
-            Userinfo userinfo = new Userinfo(username,realname,password,addr);
-            if (username == null || realname == null || password == null || addr == null){
+            String setmealid = ServletActionContext.getRequest().getParameter("setmealid");
+            Userinfo userinfo = new Userinfo(username,realname,password,addr,Integer.parseInt(setmealid));
+            if (username == null || realname == null || password == null || addr == null || setmealid == null){
                 jsonObject.put("code", -1);
                 jsonObject.put("message", "用户未输入完整");
                 write(jsonObject);
@@ -85,7 +93,8 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
 
         String realname = ServletActionContext.getRequest().getParameter("realname");
         String addr = ServletActionContext.getRequest().getParameter("addr");
-        if ( realname == null || addr == null) {
+        String setmealid = ServletActionContext.getRequest().getParameter("setmealid");
+        if ( realname == null || addr == null || setmealid==null) {
             write(JSONUtil.getJSONObject(-1, "输入数据不完全"));
             return;
         }
@@ -96,6 +105,7 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
         }
         userinfo.setRealname(realname);
         userinfo.setAddr(addr);
+        userinfo.setSetmealid(Integer.parseInt(setmealid));
         userinfoService.updateUser(userinfo);
         session.setAttribute("user",userinfo);
         write(JSONUtil.getJSONObject(0,"修改成功"));
@@ -149,6 +159,15 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
         jsonObject.put("realname",userinfo.getRealname());
         jsonObject.put("addr",userinfo.getAddr());
         jsonObject.put("inserttime",userinfo.getInsertTime());
+        Setmeal setmeal = setmealService.findById(userinfo.getSetmealid());
+            JSONObject steamealObject = new JSONObject();
+             steamealObject.put("id",setmeal.getId());
+             steamealObject.put("price",setmeal.getPrice());
+                steamealObject.put("name",setmeal.getName());
+                steamealObject.put("total",setmeal.getTotal());
+                steamealObject.put("desc",setmeal.getDesc());
+                steamealObject.put("inserttime",setmeal.getInserttime());
+        jsonObject.put("setmeal",steamealObject);
         write(JSONUtil.getJSONObject(0,"获取成功",jsonObject));
     }
     public static void write(JSONObject jsonObject){

@@ -18,16 +18,20 @@ public class CORSFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
         /*支持全域名访问*/
+        httpResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:9002");
+//        httpResponse.setHeader("Access-Control-Allow-Headers", "*");
+//        httpResponse.setHeader("Access-Control-Allow-Methods", "*");
+
         System.out.println("进入了这里");
 //        httpResponse.addHeader("Access-Control-Allow-Origin", "*");
-        httpResponse.setContentType("text/html;charset=UTF-8");
-        httpResponse.setHeader("Access-Control-Allow-Origin", "*");
-        httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-        httpResponse.setHeader("Access-Control-Max-Age", "0");
-        httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,userId,token");
-        httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
-        httpResponse.setHeader("XDomainRequestAllowed","1");
-//        httpResponse.addHeader("Access-Control-Allow-Credentials","true");
+//        httpResponse.setContentType("text/html;charset=UTF-8");
+//        httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+//        httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+//        httpResponse.setHeader("Access-Control-Max-Age", "0");
+//        httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,userId,token");
+//        httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+//        httpResponse.setHeader("XDomainRequestAllowed","1");
+        httpResponse.addHeader("Access-Control-Allow-Credentials","true");
 //        httpResponse.addHeader("Access-Control-Request-Headers","Client-Sytle,User-Token" );
 //        httpResponse.addHeader("Access-Control-Allow-Headers","Client-Sytle,User-Token" );
         /*支持http的动作，在自定义请求头的时候，会发送。。预请求。。，如果遇到跨域并且设置headers的请求，所有请求需要两部

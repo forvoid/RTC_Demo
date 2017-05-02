@@ -28,6 +28,9 @@ public class GroupService {
         userGroupDao.createGroup(userGroup);
 
     }
+    public boolean isAddGroup(int uid, int gid){
+        return  userGroupDao.isAddGroup(uid,gid);
+    }
 
     public Userinfo findByIdForUserInfo(int id){
         return userinfoDao.findById(id);

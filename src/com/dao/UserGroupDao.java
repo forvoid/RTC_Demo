@@ -2,6 +2,7 @@ package com.dao;
 
 import com.vo.UserGroup;
 import com.vo.UserandGroup;
+import org.hibernate.Query;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 
 import java.util.List;
@@ -35,6 +36,16 @@ public class UserGroupDao extends HibernateDaoSupport{
     public List findMohuByName(String name) {
         String queryString = "from UserGroup as model where model.name like ?";
         return getHibernateTemplate().find(queryString,"%"+name+"%");
+    }
+    /**
+     * 判端用户是否已经加入群组
+     * */
+    public boolean isAddGroup(int uid, int gid) {
+        String queryString = "from UserandGroup as model where model.uid= ? and model.gid = ?";
+        Query query = getSession().createQuery(queryString);
+        query.setParameter(0, uid);
+        query.setParameter(1, gid);
+        return  query.list().size()==0?true:false;
     }
     /**
      * 加入电话组

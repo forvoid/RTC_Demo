@@ -26,5 +26,8 @@
         <property name="insertTime" type="java.util.Date">
             <column name="inserttime"  />
         </property>
+        <property name="setmealid" type="java.lang.Integer">
+            <column name="setmealid"  />
+        </property>
     </class>
 </hibernate-mapping>

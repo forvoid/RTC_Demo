@@ -78,8 +78,14 @@ public class GroupAction extends ActionSupport{
             return;
         }
         int uid = userinfo.getId();
-        groupService.addGroup(gid,uid);
-        UserinfoAction.write(JSONUtil.getJSONObject(0,"添加成功等待管理员审核"));
+        //判断用户是否已经加入过群组
+        if (groupService.isAddGroup(uid,gid)){
+            groupService.addGroup(gid,uid);
+            UserinfoAction.write(JSONUtil.getJSONObject(0,"添加成功等待管理员审核"));
+        }else{
+            UserinfoAction.write(JSONUtil.getJSONObject(-1,"用户已经添加过了"));
+        }
+
     }
     /**
      *查看群组中的用户信息

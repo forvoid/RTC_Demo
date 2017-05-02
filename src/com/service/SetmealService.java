@@ -22,7 +22,9 @@ public class SetmealService {
     public void delete(){
 
     }
-
+    public Setmeal findById(int id){
+        return setMealDao.findById(id);
+    }
     public void setSetmealDao(SetmealDao setMealDao) {
         this.setMealDao = setMealDao;
     }
