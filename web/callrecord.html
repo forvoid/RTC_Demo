@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>通话记录</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+       <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="home.html">主页</a> </li>
+                    <li><a href="profile.html">个人资料</a> </li>
+                    <li><a href="callrecord.html">通话记录</a> </li>
+                    <li><a href="group.html">群组管理</a> </li>
+                    <li><a href="charge.html">充值中心</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="left x8 x2-move padding-large">
+            <div class="line">
+                <div class="panel">
+                    <div class="panel-head bg-main">通话记录</div>
+                    <div class="panel-body">
+                        <ul id="user-group" class="list-group">
+                            <li><span class="icon-asterisk rotate text-large"></span>载入中。。。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+        $.pagetotal = 1
+        $.perpage = 20;
+        $('#signout').click(function(){
+            $.getJSON(getURL('logout'),function(resp){
+                console.log(resp);
+                if(resp.code ==0){
+                   window.location.href='./index.html';
+                };
+
+            })
+        });
+        $.getJSON(getURL('seeUserInfo'), function (result) {
+            if (result.code != 0) {
+                window.location.href = './index.html';
+            }
+            var user = result.data;
+            var uid = user.id;
+
+            $.user = user;
+              $('#top-username').text(user.realname);
+            console.log(result);
+            $.getJSON(getURL('callRecord'), {
+                uid: uid,
+                page: 1,
+                row: $.perpage
+            }, function (resp) {
+
+                console.log(resp);
+                if (resp.code != 0) {
+                    alert(resp.message)
+                } else {
+
+                }
+
+            })
+        });
+
+        function fillRecord(list) {
+          
+            var html = "";
+            list.forEach(function (element) {
+                html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
+                    '"><span class="icon icon-reorder"></span>' +
+                    element.name + '</a></li>';
+            }, this);
+
+            $('#user-group').html(html);
+        };
+    </script>
+</body>
+
+</html>

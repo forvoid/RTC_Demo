@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>首页登录注册</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="container-layout padding-big ">
+        <div class="line">
+            <div class="text-center">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+
+        <style type="text/css">
+            /*特别说明，验证码样式不包含在拼图pintuer.css文件内，需要自己添加到自己的style.css文件中，若要使用登录模块，需复制.passcode样式。*/
+
+            .passcode {
+                position: absolute;
+                right: 0;
+                top: 0;
+                height: 32px;
+                margin: 1px;
+                border-left: solid 1px #ddd;
+                text-align: center;
+                line-height: 32px;
+                border-radius: 0 4px 4px 0;
+            }
+        </style>
+        <div align="center">
+            <form action="home.html" method="post" id="oneform">
+                <div class="panel padding" style="width: 450px;text-align: left;">
+                    <div class="text-center">
+                        <br>
+                        <h2><strong>欢迎使用&nbsp;拼图</strong></h2>
+                    </div>
+                    <div class="" style="padding:30px;">
+                        <div class="form-group">
+                            <div class="field field-icon-right">
+                                <input id="username" type="text" class="input" name="admin" placeholder="请输入登录账号" data-validate="required:请填写账号,length#>=4:账号长度不符合要求"
+                                />
+                                <span class="icon icon-user"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="field field-icon-right">
+                                <input id="password" type="password" class="input" name="password" placeholder="请输入登录密码" data-validate="required:请填写密码,length#>=4:密码长度不符合要求"
+                                />
+                                <span class="icon icon-key"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="field">
+                                <button id='submit' class="button button-block bg-main text-big">立即登录</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="field text-center">
+                                <p class="text-muted text-center"><a class="" href="./register.html">注册</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right text-small text-gray padding-top">智慧科技</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+       
+        $(function () {
+            $("#submit").click(function () {
+                var username = $('#username').val();
+                var password = $('#password').val();
+
+                if (username.length <= 3 || password.length <= 3) {
+                    return false;
+                } else {
+
+                    $.getJSON(getURL('login'), {
+                        username: username,
+                        password: password
+                    }, function (result, xx) {
+
+                        if (result.code != 0) {
+                            alert(result.message);
+                        } else {
+                            window.location = './home.html';
+
+                        }
+                        console.log(result);
+                    });
+                }
+
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

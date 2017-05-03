@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>个人资料</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+        <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="home.html">主页</a> </li>
+                    <li><a href="profile.html">个人资料</a> </li>
+                    <li><a href="callrecord.html">通话记录</a> </li>
+                    <li><a href="group.html">群组管理</a> </li>
+                    <li><a href="charge.html">充值中心</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="left x8 x2-move padding-large">
+            <div class="line margin-bottom">
+                <div class="panel">
+                    <div class="panel-head">基本信息</div>
+                    <div class="panel-body">
+                        <div>
+                            <label for="" class="label">真实姓名</label>
+                            <input id="profile-realname" type="input" class="input" placeholder="请输入真实姓名">
+                        </div>
+                        <div class="margin-bottom">
+                            <label for="" class="label">详细地址</label>
+                            <input id="profile-addr" type="input" class="input" placeholder="请详细地址">
+                        </div>
+                        <div class="margin-bottom">
+                            <p>套餐信息</p>
+                            <div class="border border-main" id='options'>
+
+                            </div>
+                        </div>
+                        <button class="button" id="upd-pro">
+                            更新信息
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="line margin-bottom">
+                <div class="panel">
+                    <div class="panel-head">修改密码</div>
+                    <div class="panel-body">
+                        <div>
+                            <label for="" class="label">新密码</label>
+                            <input id="newpwd" type="password" class="input" placeholder="请输入新密码">
+                        </div>
+                        <div class="margin-bottom">
+                            <label for="" class="label">再次确认密码</label>
+                            <input id="newpwd2" type="password" class="input" placeholder="请再次确认您的新密码">
+                        </div>
+                        <button class="button" id="upd-pwd">
+                            更新密码
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
+                };
+
+            })
+        });
+        $.getJSON(getURL('seeUserInfo'), function (result) {
+            if (result.code != 0) {
+                window.location.href = './index.html';
+            }
+            var user = result.data;
+            var uid = user.id;
+
+            $.user = user;
+
+            $('#top-username').text(user.realname);
+            //把用户名添加到页面中
+            $('#profile-username').text(user.name);
+
+            //把真实名字添加到页面中
+            $('#profile-realname').val(user.realname);
+
+            //把真实地址添加到页面中
+            $('#profile-addr').val(user.addr);
+
+            $('#options').html('<h1>' + user.setmeal.name + '</h1><p>' + user.setmeal.desc + '</p>')
+
+            $('#upd-pro').click(function () {
+                var realname = $('#profile-realname').val();
+                var addr = $('#profile-addr').val();
+                $.getJSON(getURL('updateUserInfo'), {
+                    realname: realname,
+                    addr: addr,
+                    setmealid: $.user.setmeal.id
+                }, function (resp) {
+                    console.log(resp);
+                    alert(resp.message)
+                })
+
+            })
+
+
+
+
+            console.log(result);
+
+        });
+
+        $('#upd-pwd').click(function () {
+            var newpwd = $('#newpwd').val().trim();
+            var newpwd2 = $('#newpwd2').val().trim();
+
+
+            if (newpwd.length <= 0) {
+                alert('密码不能为空')
+            } else if (newpwd.length <= 3) {
+                alert('密码长度不得低于4位！')
+            } else if (newpwd != newpwd2) {
+                alert('两次密码不一致！')
+            } else {
+                $.getJSON(getURL('updateUserPassword'), {
+                    password: newpwd
+                }, function (resp) {
+                    console.log(resp);
+                    alert(resp.message);
+                })
+            }
+        });
+    </script>
+</body>
+
+</html>

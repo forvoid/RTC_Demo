@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style lang="">
+    .video{
+      width:400px;
+      height: 200px;
+    }
+    video{
+      display: inline-block;
+          width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.original.html">the original demo</a>
+  <div class="video"><video src="" id="localVideo" autoplay></video></div>  
+  <div class="video"><video src="" id="remoteVideo" autoplay></video></div>  
+
+ <div>
+
+    <div><input type="text" value=1 id="id-input"><button id="startButton">Start</button>
+      </div>
+      <div><input type="text" value=2 id="who"> <button id="callButton">Call</button></div>
+      
+      <button id="hangupButton">Hang Up</button>
+    </div>
+  <script src="./js/adapter-latest.js"></script>
+  <script src="./js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>主页</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+    <style lang="">
+        .video {
+            background-color: cyan;
+        }
+
+        video {
+            display: inline-block;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+        <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="home.html">主页</a> </li>
+                    <li><a href="profile.html">个人资料</a> </li>
+                    <li><a href="callrecord.html">通话记录</a> </li>
+                    <li><a href="group.html">群组管理</a> </li>
+                    <li><a href="charge.html">充值中心</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="left x8 padding-large">
+            <div class="line">
+                <p class="bg-blue bg-inverse padding">
+                    剩余余额：<span class="badge bg-white" id="balance">18</span>元
+                </p>
+            </div>
+            <div class="line">
+                <div class="video x9 ">
+                    <video src="" id="remoteVideo" autoplay style="width:100%;height:100%;"></video>
+                    <div class="line text-center">
+                        <h1>当前无人通话</h1>
+                        <button class="button">
+                    静音
+                </button>
+                        <button class="button" id='hangup-btn'>
+                    挂断
+                </button>
+                    </div>
+                </div>
+                <div class="video x3 padding">
+                    <video src="" id="localVideo" muted autoplay style="width:100%;height:100%;"></video>
+                </div>
+            </div>
+
+        </div>
+        <div class="right x4 padding-large">
+            <div class="panel">
+                <div class="panel-head">在线用户</div>
+                <div class="panel-body">
+                    <ul id="user-group" class="list-group">
+                        <li><span class="icon-asterisk rotate text-large"></span>载入中。。。</li>
+                        <!--<li><a href="javascript:void 0;"><span class="icon icon-user"></span>sdfwae</a>
+                            <div>
+                                <ul>
+                                    <li><a href="#">afsdf</a></li>
+                                    <li><a href="#">afsdf</a></li>
+                                    <li><a href="#">afsdf</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li><a href="javascript:void 0;">sdfwae</a></li>-->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./ext/adapter-latest.js"></script>
+    <script>
+        function trace(arg) {
+            var now = (window.performance.now() / 1000).toFixed(3);
+            console.log(now + ': ', arg);
+        }
+
+
+        var channelOpenTime,
+            initiator;
+
+        var startTime;
+        var localVideo = document.getElementById('localVideo');
+        var remoteVideo = document.getElementById('remoteVideo');
+
+        remoteVideo.onresize = function () {
+            trace('Remote video size changed to ' + remoteVideo.videoWidth + 'x' + remoteVideo.videoHeight);
+            // We'll use the first onsize callback as an indication that video has started
+            // playing out.
+            if (startTime) {
+                var elapsedTime = window
+                    .performance
+                    .now() - startTime;
+                trace('Setup time: ' + elapsedTime.toFixed(3) + 'ms');
+                startTime = null;
+            }
+        };
+
+        var localStream,
+            remoteStream;
+        var pc1;
+        var offerOptions = {
+            offerToReceiveAudio: 1,
+            offerToReceiveVideo: 1
+        };
+
+        var servers = {
+            iceServers: [{
+                urls: "stun:stun.l.google.com:19302",
+            }]
+        };
+
+        function
+        start() {
+
+            pc1 = new RTCPeerConnection(servers);
+            pc1.onicecandidate = function (event) {
+                trace("状态改变触发:");
+                trace(event);
+                if (event.candidate) {
+                    socket.send(JSON.stringify({
+                        option: "message",
+                        data: {
+                            type: "candidate",
+                            data: event.candidate
+                        }
+                    }));
+                }
+                // pc1.addIceCandidate(event.candidate);
+                // pc1   .addIceCandidate(event.candidate)   .then(function () {
+                // onAddIceCandidateSuccess(pc1);   }, function (err) {
+                // onAddIceCandidateError(pc1, err);   });
+                trace('pc1 ' + ' ICE candidate: \n' + (event.candidate ?
+                    event.candidate.candidate :
+                    '(null)'));
+            };
+
+            pc1.oniceconnectionstatechange = function (e) {
+                trace("状态已改变");
+                onIceStateChange(pc1, e);
+            };
+
+            trace('Requesting local stream');
+            // startButton.disabled = true;
+            navigator
+                .mediaDevices
+                .getUserMedia({
+                    audio: true,
+                    video: true
+                })
+                .then(function (stream) {
+                    trace('Received local stream');
+                    console.log(stream);
+                    //var url = URL.createObjectURL(stream); localVideo.src = url;
+                    localVideo.srcObject = stream;
+                    localStream = stream;
+                    pc1.onaddstream = function (e) {
+                        console.log(e);
+
+                        remoteVideo.srcObject = e.stream;
+                        remoteStream = e.stream;
+                    };
+                    pc1.addStream(localStream);
+                })
+                .catch(function (e) {
+                    alert('摄像头异常，请重试。\n ' + e.name);
+                });
+        }
+
+        function
+        call(whoid) {
+
+            // pc2.oniceconnectionstatechange = function (e) {   trace("pc2 onicecandidate
+            // state change");   onIceStateChange(pc2, e); };
+
+            trace('Added local stream to pc1');
+            trace('pc1 createOffer start');
+            pc1
+                .createOffer(offerOptions)
+                .then(function (desc) {
+                    trace('pc1 setLocalDescription start');
+
+                    // console.log("发送", JSON.stringify({option: "call", to: whoid}))
+                    // socket.send(JSON.stringify({option: "call", to: whoid}));
+
+                    pc1
+                        .setLocalDescription(desc)
+                        .then(function () {
+                            onSetLocalSuccess(pc1);
+                            console.log(desc);
+                            socket.send(JSON.stringify({
+                                option: 'call',
+                                to: whoid,
+                                data: pc1.localDescription
+                            }))
+                        }, onSetSessionDescriptionError);
+                }, onCreateSessionDescriptionError);
+        }
+
+
+
+        function
+        onCreateSessionDescriptionError(error) {
+            trace('Failed to create session description: ' + error.toString());
+        }
+
+        function
+        onIceCandidate(pc, event) {}
+
+        function
+        onAddIceCandidateSuccess(pc) {
+            trace('pc1 ' + ' addIceCandidate success');
+        }
+
+        function
+        onAddIceCandidateError(pc, error) {
+            trace('pc1 ' + ' failed to add ICE Candidate: ' + error.toString());
+        }
+
+        function
+        onIceStateChange(pc, event) {
+            if (pc) {
+                trace('pc1 ' + ' ICE state: ' + pc.iceConnectionState);
+                console.log('ICE state change event: ', event);
+            }
+        }
+
+        function doHangup() {
+            socket.send(JSON.stringify({
+                option: 'hangup'
+            }));
+            hangup();
+        }
+
+        function
+        hangup() {
+            trace('Ending call');
+            pc1.close();
+
+            pc1 = null;
+
+        }
+
+        function openChannel(id) {
+
+            socket = new WebSocket(getURL('ws') + "ws/chat/" + id);
+            //socket = new WebSocket("ws://182.254.133.83:8080/RTC_Demo/ws/chat/" + id);
+            socket.onopen = onChannelOpened;
+            socket.onmessage = onChannelMessage;
+            socket.onclose = onChannelClosed;
+            socket.onerror = onChannelError;
+
+        }
+
+        // websocket打开
+        function
+        onChannelOpened() {
+            console.log("websocket打开");
+            channelOpenTime = new Date();
+            channelReady = true;
+        }
+
+        // websocket收到消息
+        function
+        onChannelMessage(message) {
+            console.log("收到信息 : " + message.data);
+            processSignalingMessage(message.data); //建立视频连接
+        }
+
+        // 处理消息
+        function
+        processSignalingMessage(message) {
+            var msg = JSON.parse(message);
+            if (msg.option === "agree") {
+                trace('对方已同意通话');
+                pc1.setRemoteDescription(new RTCSessionDescription(msg.data));
+
+            } else if (msg.option === "bye") {
+
+            } else if (msg.option === "be_hangup ") {
+                hangup()
+                alert(msg.message);
+            } else if (msg.option === "option1") {
+                hangup()
+                alert(msg.message);
+            } else if (msg.option === "option2") {
+                hangup()
+                alert(msg.message);
+            } else if (msg.option === "online") {
+                userOnline(msg.data);
+            } else if (msg.option === "offline") {
+                userOffline(msg.data);
+            } else if (msg.option === "allGroup") {
+                updateGroup(msg.data)
+            } else if (msg.option === "message") {
+                console.log("收到message消息");
+                if (msg.data.type === "candidate") {
+                    trace('收到验证消息：', msg.data);
+                    var candidate = new RTCIceCandidate(msg.data.data);
+                    pc1.addIceCandidate(candidate);
+                }
+            } else if (msg.option == "requestLink") {
+
+
+                var choice = confirm('用户向您请求通话，是否接听？');
+
+                if (choice) {
+                    //选择接听通话
+
+                    start();
+                    //启动本地建立PeerConnection连接。
+
+                    pc1
+                        .setRemoteDescription(new RTCSessionDescription(msg.data))
+                        .then(function () {
+                            trace("set remote Description success");
+                        }, onSetSessionDescriptionError);
+                    trace('收到通话请求');
+                    // Since the 'remote' side has no media stream we need to pass in the right
+                    // constraints in order for it to accept the incoming offer of audio and video.
+
+
+                    pc1
+                        .createAnswer(pc1.remoteDescription)
+                        .then(function (desc) {
+                            trace('Answer from pc2:\n' + desc.sdp);
+                            trace('pc2 setLocalDescription start');
+
+
+                            pc1
+                                .setLocalDescription(desc)
+                                .then(function () {
+                                    console.log("回答通话请求");
+                                    socket.send(JSON.stringify({
+                                        option: "answer",
+                                        request: 'ok',
+                                        data: pc1.localDescription
+                                    }));
+                                })
+
+                        }, onCreateSessionDescriptionError);
+                } else {
+                    //不接听电话
+                    socket.send(JSON.stringify({
+                        option: "answer",
+                        request: 'sorry',
+                    }));
+                }
+
+
+
+                // socket.send(JSON.stringify({option: "answer", request: "sorry", requestid:
+                // msg.requestid}));
+            }
+        }
+
+        // websocket异常
+        function
+        onChannelError(event) {
+            console.log("websocket异常 ： " + event);
+
+            //alert("websocket异常");
+        }
+
+        // websocket关闭
+        function
+        onChannelClosed() {
+            console.log("websocket关闭");
+            if (!channelOpenTime) {
+                channelOpenTime = new Date();
+            }
+            channelCloseTime = new Date();
+            //openChannel();
+        }
+
+        function
+        onSetLocalSuccess(pc) {
+            trace('pc1 ' + ' setLocalDescription complete');
+        }
+
+        function
+        onSetRemoteSuccess(pc) {
+            trace('pc1 ' + ' setRemoteDescription complete');
+        }
+
+        function
+        onSetSessionDescriptionError(error) {
+            trace('Failed to set session description: ' + error.toString());
+        }
+    </script>
+
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+        $.getJSON(getURL('seeUserInfo'), function (result) {
+            if (result.code != 0) {
+                window.location.href = './index.html';
+            }
+            var user = result.data;
+            var uid = user.id;
+
+            $.user = user;
+            $('#top-username').text(user.realname);
+            console.log(result);
+
+            updateBalance(uid);
+            openChannel(uid);
+        });
+
+
+        function updateGroup(list) {
+            //获得用户已加入的群组
+
+
+            var html = "";
+            list.forEach(function (element) {
+                var userHTML = "";
+                var users = element.user;
+                users.forEach(function (el) {
+                    var addv;
+                    if (el.status == 'offline') {
+                        addv = '';
+                    } else if (el.status == 'online') {
+                        addv = 'bg-green';
+                    }
+
+                    userHTML += '<li>' +
+                        '<div class="media media-x"><a class="float-left user-head" href="javascript:void 0;"><span class="icon icon-user"></span></a>' +
+                        '<div class="media-body"><a class="user-name" href="javascript:;" data-uid="' +
+                        el.uid + '"><strong>' +
+                        el.realname + ' <span class="badge ' + addv +
+                        '">&nbsp;</span></strong></a></div></div>' +
+                        '</li>'
+                });
+
+                userHTML = '<ul class="list-group">' + userHTML + '</ul>';
+
+                html += '<li><a class="group-link" href="javascript:void 0;" data-gid="' + element.gid +
+                    '"><span class="icon icon-reorder"></span> ' +
+                    element.name + '</a>' + userHTML + '</li>';
+            }, this);
+
+            $('#user-group').html(html);
+
+
+
+        };
+
+
+
+        $('#user-group').on('click', '.group-link', function () {
+            var $group = $(this);
+            var gid = $group.data('gid');
+            var opened = $group.data('opened');
+            if (opened === undefined) opened = 1;
+            console.log(opened);
+            if (opened == 1) {
+                //已经展开了
+                $group.data('opened', 0);
+                var $userlist = $group.next();
+                console.log($userlist);
+                if ($userlist.length != 0) {
+                    $userlist.slideUp();
+                }
+            } else {
+                //没有展开，
+                $group.data('opened', 1);
+                var $userlist = $group.next();
+                console.log($userlist);
+                if ($userlist.length != 0) {
+                    //长度不为0，展开用户列表
+                    $userlist.slideDown();
+                }
+            }
+        }).on('click', '.user-name', function () {
+            //点击用户名字,开始打电话
+            var status = $(this).find('.badge');
+            if (!status.hasClass('bg-green')) {
+                //如果用户不在线
+                alert('用户不在线');
+                return;
+            }
+
+            var _call = confirm('是否拨打电话？');
+            if (_call) {
+
+                var uid = $(this).data('uid');
+                start(); //本地建立PeerConnection
+                call(uid);
+            } else {
+                //
+            }
+
+        }).on('click', '.user-head', function () {
+            $(this).next().find('.user-name').click();
+        });
+
+        function updateBalance(uid) {
+
+            $.getJSON(getURL('queary'), {
+                uid,
+                uid
+            }, function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    $('#balance').text(resp.data);
+                } else {
+                    alert(resp.messsage)
+                }
+            })
+        };
+
+        function userOnline(data) {
+            var $el = $('#user-group').find('[data-uid="' + data.id + '"]');
+            $.each($el, function (index, el) {
+                $(el).find('.badge').addClass('bg-green');
+            })
+
+        }
+
+        function userOffline(data) {
+              var $el = $('#user-group').find('[data-uid="' + data.id + '"]');
+            $.each($el, function (index, el) {
+                $(el).find('.badge').removeClass('bg-green');
+            })
+
+        }
+
+
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
+                };
+
+            })
+        });
+
+        $('#hangup-btn').click(function () {
+            doHangup();
+        })
+
+        /**
+         *   WebSocket Stuff
+         */
+    </script>
+</body>
+
+</html>

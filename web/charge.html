@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>充值中心</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+        <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="home.html">主页</a> </li>
+                    <li><a href="profile.html">个人资料</a> </li>
+                    <li><a href="callrecord.html">通话记录</a> </li>
+                    <li><a href="group.html">群组管理</a> </li>
+                    <li><a href="charge.html">充值中心</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="left x8 padding-large">
+            <div class="line">
+                <div class="panel">
+                    <div class="panel-head">话费充值记录</div>
+                    <div class="panel-body">
+                        <ul id="user-group" class="list-group">
+                            <li><a href="javascript:void 0;"><span class="icon icon-user"></span>sdfwae</a></li>
+                            <li><a href="javascript:void 0;">sdfwae</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right x4 padding-large">
+            <div class="panel margin-bottom">
+                <div class="panel-head">
+                    当前余额
+                </div>
+                <div class="panel-body">
+                    <span class="badge bg-green text-large" id="balance">?</span> 元
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+                <div class="panel-head">
+                    请输入充值金额
+                </div>
+                <div class="panel-body">
+                    <p>
+
+                        <input type="text" class="input" id="chargeNumber">
+                    </p>
+                    <p class="text-center"><button class="button bg-main" id="docharge">充值</button></p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+                $('#signout').click(function(){
+            $.getJSON(getURL('logout'),function(resp){
+                console.log(resp);
+                if(resp.code ==0){
+                   window.location.href='./index.html';
+                };
+
+            })
+        });
+        $.getJSON(getURL('seeUserInfo'), function (result) {
+            if (result.code != 0) {
+                window.location.href = './index.html';
+            }
+            var user = result.data;
+            var uid = user.id;
+
+            $.user = user;
+            console.log(result);
+            $('#top-username').text(user.realname);
+
+            updateBalance(uid);
+            chargeRecords(uid);
+        });
+
+        $('#docharge').click(function () {
+            var num = $('#chargeNumber').val().trim();
+            console.log(num);
+            if (/^\d\d*$/gim.test(num)) {
+                if (num <= 0) {
+                    alert('不能为负数！');
+                    $('#chargeNumber').focus();
+                } else if (num > 200) {
+                    alert('一次充值金额不能超过200！');
+                    $('#chargeNumber').focus();
+                } else {
+                    $.getJSON(getURL('charge'), {
+                        uid: $.user.id,
+                        createid:$.user.id,
+                        money:num
+                    },function(resp){
+                        console.log(resp);
+                        if(resp.code ==0){
+                            alert('充值成功！');
+                            window.location.reload();
+                        }
+                    })
+                }
+            } else {
+                alert('请输入正确的数字！');
+                $('#chargeNumber').focus();
+            }
+        })
+
+        function chargeRecords(uid) {
+            //获得用户已加入的群组
+            $.getJSON(getURL('chargeRecord'), {
+                uid: uid,
+                page: 1,
+                row: 10
+            }, function (resp) {
+                console.log(resp);
+                return;
+                var list = resp.data;
+                var html = "";
+                list.forEach(function (element) {
+                    html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
+                        '"><span class="icon icon-reorder"></span>' +
+                        element.name + '</a></li>';
+                }, this);
+
+                $('#user-group').html(html);
+            })
+        };
+
+
+        function updateBalance(uid) {
+
+            $.getJSON(getURL('queary'), {
+                uid,
+                uid
+            }, function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    $('#balance').text(resp.data);
+                } else {
+                    alert(resp.messsage)
+                }
+            })
+        };
+    </script>
+</body>
+
+</html>
