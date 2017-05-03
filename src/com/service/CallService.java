@@ -33,7 +33,7 @@ public class CallService {
             for (UserandGroup userandGroup:userGroupList){
                 UserGroup userGroup =  userGroupDao.findGroupByGid(userandGroup.getGid());
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("gid",userGroup.getId());
+                jsonObject.put("gid",userandGroup.getGid());
                 jsonObject.put("name",userGroup.getName());
                 //根据gid查询所有的用户
                 List<UserandGroup> userandGroups = userGroupDao.findUserBygid(userandGroup.getGid());
@@ -72,6 +72,20 @@ public class CallService {
         }else {
             return false;
         }
+    }
+    /**
+     * findGroupByuid
+     * */
+    public JSONArray findGroupByuid(int uid){
+        List<UserandGroup>  userandGroups = userGroupDao.findGroupByuid(uid);
+        if (userandGroups!=null&&userandGroups.size()!=0){
+            JSONArray jsonArray =new JSONArray();
+            for (UserandGroup userandGroup:userandGroups){
+                jsonArray.add(userandGroup.getGid());
+            }
+            return jsonArray;
+        }
+        return null;
     }
     /**
      * 挂电话

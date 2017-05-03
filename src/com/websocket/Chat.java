@@ -52,7 +52,10 @@ public class Chat {
 //        上线提示;
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", id);
+            jsonObject.put("gid",callService.findGroupByuid(id));
             pushAllElseSelf(JSONUtil.getSocketJSONObject(0, "用户" + id + "上线了", jsonObject, "online").toString(), id);
+//            System.out.println(jsonObject.toJSONString());
+//            JSONUtil.getSocketJSONObject(0,"用户"+id+"下线了",jsonObject,"offline").toString()
             //发送群组数据信息
             allGroup(this.id);
         }catch (Exception e){
@@ -74,6 +77,7 @@ public class Chat {
         //        下线提示;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id",id);
+        jsonObject.put("gid",callService.findGroupByuid(id));
         pushAllElseSelf(JSONUtil.getSocketJSONObject(0,"用户"+id+"下线了",jsonObject,"offline").toString(),this.id);
 
     }

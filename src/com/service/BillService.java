@@ -43,8 +43,21 @@ public class BillService {
     /**用户话费费用查询**/
 
     public double billSumById(int uid){
-
-        return billDao.billSumById(uid);
+        double sum = 0;
+        List<Recharge> list = billDao.findRechargeByUid(uid);
+        if (list.size()!=0){
+            for (Recharge recharge :list){
+                sum += recharge.getMoney();
+            }
+        }
+        List<Records> recordsList = billDao.findRecordByUid(uid);
+        if (recordsList.size()!=0){
+            for (Records records:recordsList){
+                sum-=records.getLength();
+            }
+        }
+        return sum;
+//        return billDao.billSumById(uid);
     }
     /**用户充值操作**/
     public void addRecharge(Recharge recharge){

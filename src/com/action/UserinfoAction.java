@@ -1,9 +1,11 @@
 package com.action;
 
 import com.alibaba.fastjson.JSONObject;
+import com.service.BillService;
 import com.service.SetmealService;
 import com.service.UserinfoService;
 import com.util.JSONUtil;
+import com.vo.Recharge;
 import com.vo.Setmeal;
 import com.vo.Userinfo;
 import org.apache.struts2.ServletActionContext;
@@ -22,6 +24,15 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
     private HttpSession session;
     private UserinfoService userinfoService;
     private SetmealService setmealService;
+    private BillService billService;
+
+    public BillService getBillService() {
+        return billService;
+    }
+
+    public void setBillService(BillService billService) {
+        this.billService = billService;
+    }
 
     public void setSetmealService(SetmealService setmealService) {
         this.setmealService = setmealService;
@@ -52,6 +63,9 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
                     userinfoService.addUserinfo(userinfo);
                     jsonObject.put("code", 0);
                     jsonObject.put("code", "注册成功");
+                    List<Userinfo> list = userinfoService.findByUsername(username);
+                    Recharge recharge = new Recharge(list.get(0).getId(),0,new Date(),20.00,1,"root");
+                    billService.addRecharge(recharge);
                     write(jsonObject);
                 }
             }
@@ -71,6 +85,7 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
         String username = ServletActionContext.getRequest().getParameter("username");
         String password = ServletActionContext.getRequest().getParameter("password");
         List<Userinfo> list = userinfoService.findByUsername(username);
+
         if (list!=null&&list.size()!=0){
             if(list.get(0).getPassword().equals(password)){//密码相等
                 jsonObject.put("code",0);
@@ -183,6 +198,14 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
         out.println(jsonObject);
         out.flush();
         out.close();
+    }
+    /**
+     * 用户注销
+     * */
+    public void destroy(){
+        session = ServletActionContext.getRequest().getSession();
+        session.invalidate();
+        write(JSONUtil.getJSONObject(0,"注销成功"));
     }
     public UserinfoService getUserinfoService() {
         return userinfoService;
