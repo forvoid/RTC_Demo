@@ -45,13 +45,13 @@ public class BillService {
     public double billSumById(int uid){
         double sum = 0;
         List<Recharge> list = billDao.findRechargeByUid(uid);
-        if (list.size()!=0){
+        if (list!=null&&list.size()!=0){
             for (Recharge recharge :list){
                 sum += recharge.getMoney();
             }
         }
         List<Records> recordsList = billDao.findRecordByUid(uid);
-        if (recordsList.size()!=0){
+        if (recordsList!=null&&recordsList.size()!=0){
             for (Records records:recordsList){
                 sum-=records.getLength();
             }

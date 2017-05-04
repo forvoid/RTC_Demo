@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.opensymphony.xwork2.ActionSupport;
 import com.service.BillService;
+import com.service.UserinfoService;
 import com.util.JSONUtil;
 import com.vo.Recharge;
 import com.vo.Records;
+import com.vo.Userinfo;
 import org.apache.struts2.ServletActionContext;
 
 import java.util.Date;
@@ -18,6 +20,11 @@ import java.util.List;
  */
 public class BillAction extends ActionSupport {
     private BillService billService;
+    private UserinfoService userinfoService;
+
+    public void setUserinfoService(UserinfoService userinfoService) {
+        this.userinfoService = userinfoService;
+    }
 
     public void findRecordByUid(){
         String uid = ServletActionContext.getRequest().getParameter("uid");
@@ -32,6 +39,8 @@ public class BillAction extends ActionSupport {
                 jsonObject.put("id",records.getId());
                 jsonObject.put("uid",records.getUid());
                 jsonObject.put("starttime",records.getStarttime());
+                Userinfo userinfo  = userinfoService.findById(records.getTowho());
+                jsonObject.put("towho",userinfo.getRealname());
                 jsonObject.put("length",records.getLength());
                 jsonArray.add(jsonObject);
             }
@@ -128,11 +137,11 @@ public class BillAction extends ActionSupport {
         UserinfoAction.write(JSONUtil.getJSONObject(0,"获取添加成功"));
 
     }
-    /**用户通话添加测试**/
-    public void addRecordes(){
-        Records records1 = new Records(1,new Date(),50);
-        billService.addRecordes(records1);
-    }
+//    /**用户通话添加测试**/
+//    public void addRecordes(){
+//        Records records1 = new Records(1,new Date(),50);
+//        billService.addRecordes(records1);
+//    }
 
 
     public BillService getBillService() {

@@ -87,6 +87,9 @@ public class CallService {
         }
         return null;
     }
+    public String findNameById(int id){
+       return userinfoDao.findById(id).getRealname();
+    }
     /**
      * 挂电话
      * */

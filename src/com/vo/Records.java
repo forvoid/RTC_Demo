@@ -10,14 +10,20 @@ public class Records {
     private int uid;
     private Date starttime;
     private int length;
+    private int whocall;
+    private int towho;
+
 
     public Records() {
     }
 
-    public Records(int uid, Date starttime, int length) {
+    public Records(int uid, Date starttime, int length,int towho,int whocall) {
         this.uid = uid;
         this.starttime = starttime;
         this.length = length;
+        this.length = length;
+        this.towho= towho;
+        this.whocall = whocall;
     }
 
     public int getId() {
@@ -51,4 +57,20 @@ public class Records {
     public void setLength(int length) {
         this.length = length;
     }
+    public int getWhocall() {
+        return whocall;
+    }
+
+    public void setWhocall(int whocall) {
+        this.whocall = whocall;
+    }
+
+    public int getTowho() {
+        return towho;
+    }
+
+    public void setTowho(int towho) {
+        this.towho = towho;
+    }
+
 }

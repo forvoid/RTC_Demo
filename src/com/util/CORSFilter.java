@@ -17,10 +17,13 @@ public class CORSFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
         /*支持全域名访问*/
-        String referer = httpResponse.getHeader("Referer");
-        System.out.println(referer+"  访问域名");
-        httpResponse.setHeader("Access-Control-Allow-Origin", referer);
+    //    System.out.println("进入跨域");
+        String origin = request.getHeader("Origin");
+//        System.out.println(referer+"  访问域名");
+//        System.out.println("origin"+request.getHeader("Origin"));
+        httpResponse.setHeader("Access-Control-Allow-Origin", origin);
 //        httpResponse.setHeader("Access-Control-Allow-Headers", "*");
 //        httpResponse.setHeader("Access-Control-Allow-Methods", "*");
 

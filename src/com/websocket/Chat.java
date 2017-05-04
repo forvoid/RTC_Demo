@@ -1,6 +1,7 @@
 package com.websocket;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.opensymphony.xwork2.ActionSupport;
 import com.service.CallService;
@@ -32,7 +33,8 @@ public class Chat {
         callService = (CallService)act.getBean("callService");
 
     }
-    public static final Map<Integer,Chat> connections =new HashMap<>();
+    public static  Map<Integer,Chat> connections =new HashMap<>();
+//    private static CopyOnWriteArraySet<Chat> sessions = new CopyOnWriteArraySet<TransmissionLocationWebSocket>();
 
     private Session session;
     private int id ;
@@ -69,8 +71,9 @@ public class Chat {
             hangup();
         }
         Chat chat = connections.get(this.id);
-        chat.session.close();
         connections.remove(this.id);
+        chat.session.close();
+
         chat = null;
         System.out.println("* %s %s"+
                 this.id+ "has disconnected.");
@@ -121,8 +124,14 @@ public class Chat {
      * 返回当前用户所以用户组的情况
      * **/
     public void allGroup(int uid){
-        pushOneSelf(JSONUtil.getSocketJSONObject(0,
-                "返回用户组在线情况",callService.findAllGroupByUid(uid),"allGroup").toJSONString());
+        JSONArray jsonArray = callService.findAllGroupByUid(uid);
+        if (jsonArray!=null&&jsonArray.size()!=0) {
+            pushOneSelf(JSONUtil.getSocketJSONObject(0,
+                    "返回用户组在线情况",jsonArray , "allGroup").toJSONString());
+        }else{
+            pushOneSelf(JSONUtil.getSocketJSONObject(-1,
+                    "用户没有群组",null, "allGroup").toJSONString());
+        }
     }
     /**
      * 挂电话
@@ -130,8 +139,13 @@ public class Chat {
     public void hangup(){
         int callId = whoCall; //打电话的id
         int length = (int)(new Date().getTime()-this.starttime.getTime())/60000;
-        Records records = new Records(callId,starttime,length);
+        Records records = new Records(callId,starttime,length,this.status==this.whoCall?this.id:this.status,callId==whoCall?1:2);
         callService.addRecordes(records);//计入话费
+//        if (length!=0){
+//             records = new Records(this.status,starttime,length,callId==whoCall?2:1,whoCall);
+//            callService.addRecordes(records);//计入话费
+//        }
+
         pushOne(JSONUtil.
                 getSocketJSONObject(0,
                         "用户"+this.id+"挂断了电话",null,"be_hangup").toJSONString(),status);
@@ -155,16 +169,18 @@ public class Chat {
      * 通信过程中进行数据传输
      * **/
     public void message(JSONObject jsonObject){
-        System.out.println("进入messsage");
-        System.out.println("from"+id);
-        System.out.println("to"+this.status);
-        System.out.println(jsonObject.toString());
+//        System.out.println("进入messsage");
+//        System.out.println("from"+id);
+//        System.out.println("to"+this.status);
+//        System.out.println(jsonObject.toString());
 //        JSONObject dataJSON = (JSONObject)jsonObject.get("data");
 //        resultJson.put("from",id);
         pushOne(JSONUtil.getSocketJSONObject(
                 0,
                 "用户"+this.id+"向你发送信息",this.status+"",id+"",jsonObject.get("data"),"message").toJSONString(),this.status);
-
+        System.out.println("-----"+JSONUtil.getSocketJSONObject(
+                0,
+                "用户"+this.id+"向你发送信息",this.status+"",id+"",jsonObject.get("data"),"message").toJSONString());
     }
     /**
      * 收到电话请求后反映
@@ -237,7 +253,8 @@ public class Chat {
                 connections.get(toid).whoCall=this.id;
                 //消息发送给被呼叫者
                 System.out.println("呼叫者"+id+" 被呼叫者"+toid);
-                pushOne(JSONUtil.getSocketJSONObject(0,this.id+"请求与您通话",toid+"",this.id+"",dataJSON,"requestLink").toJSONString(),toid);
+                System.out.println("from name"+callService.findNameById(this.id));
+                pushOne(JSONUtil.getSocketJSONObject(0,this.id+"请求与您通话",toid+"",callService.findNameById(this.id),dataJSON,"requestLink").toJSONString(),toid);
                 return;
             }else{//欠费
                 resultJson.put("code",-1);

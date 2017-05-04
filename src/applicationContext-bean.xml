@@ -104,6 +104,7 @@
 	</bean>
 	<bean id="billAction" class="com.action.BillAction"  scope="prototype">
 		<property name="billService" ref="billService"></property>
+		<property name="userinfoService" ref="userinfoService"></property>
 	</bean>
 	<!--<bean id="chat" class="com.websocket.Chat"  scope="prototype">-->
 		<!--<property name="callService" ref="callService"></property>-->

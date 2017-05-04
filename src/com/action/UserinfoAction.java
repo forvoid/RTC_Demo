@@ -174,16 +174,20 @@ public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
         jsonObject.put("realname",userinfo.getRealname());
         jsonObject.put("addr",userinfo.getAddr());
         jsonObject.put("inserttime",userinfo.getInsertTime());
-        Setmeal setmeal = setmealService.findById(userinfo.getSetmealid());
+        if (!userinfo.getUsername().equals("root")) {
+            Setmeal setmeal = setmealService.findById(userinfo.getSetmealid());
             JSONObject steamealObject = new JSONObject();
-             steamealObject.put("id",setmeal.getId());
-             steamealObject.put("price",setmeal.getPrice());
-                steamealObject.put("name",setmeal.getName());
-                steamealObject.put("total",setmeal.getTotal());
-                steamealObject.put("desc",setmeal.getDesc());
-                steamealObject.put("inserttime",setmeal.getInserttime());
-        jsonObject.put("setmeal",steamealObject);
-        write(JSONUtil.getJSONObject(0,"获取成功",jsonObject));
+            steamealObject.put("id", setmeal.getId());
+            steamealObject.put("price", setmeal.getPrice());
+            steamealObject.put("name", setmeal.getName());
+            steamealObject.put("total", setmeal.getTotal());
+            steamealObject.put("desc", setmeal.getDesc());
+            steamealObject.put("inserttime", setmeal.getInserttime());
+            jsonObject.put("setmeal", steamealObject);
+            write(JSONUtil.getJSONObject(0, "获取成功", jsonObject));
+        }else {
+            write(JSONUtil.getJSONObject(10, "获取成功", jsonObject));
+        }
     }
     public static void write(JSONObject jsonObject){
         HttpServletResponse response= ServletActionContext.getResponse();

@@ -21,6 +21,12 @@
         <property name="length" type="java.lang.Integer">
             <column name="length" />
         </property>
+        <property name="towho" type="java.lang.Integer">
+            <column name="towho" />
+        </property>
+        <property name="whocall" type="java.lang.Integer">
+            <column name="whocall" />
+        </property>
 
     </class>
 </hibernate-mapping>
