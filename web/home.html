@@ -144,9 +144,9 @@
 
             pc1 = new RTCPeerConnection(servers);
             pc1.onicecandidate = function (event) {
-                trace("状态改变触发:");
-                trace(event);
+                console.log("本地状态改变触发:", event);
                 if (event.candidate) {
+                    console.log('发送状态 给 远程')
                     socket.send(JSON.stringify({
                         option: "message",
                         data: {
@@ -165,30 +165,33 @@
             };
 
             pc1.oniceconnectionstatechange = function (e) {
-                trace("状态已改变");
+                trace("ICE候选状态已改变");
                 onIceStateChange(pc1, e);
             };
 
-            trace('Requesting local stream');
+
+            pc1.onaddstream = function (e) {
+
+                console.warn('添加 视频流', e);
+
+                remoteVideo.srcObject = e.stream;
+                remoteStream = e.stream;
+            };
+
+            trace('请求 本地视频流');
             // startButton.disabled = true;
-            navigator
+            return navigator
                 .mediaDevices
                 .getUserMedia({
                     audio: true,
                     video: true
                 })
                 .then(function (stream) {
-                    trace('Received local stream');
+                    trace('获得 本地视频流 成功');
                     console.log(stream);
                     //var url = URL.createObjectURL(stream); localVideo.src = url;
                     localVideo.srcObject = stream;
                     localStream = stream;
-                    pc1.onaddstream = function (e) {
-                        console.log(e);
-
-                        remoteVideo.srcObject = e.stream;
-                        remoteStream = e.stream;
-                    };
                     pc1.addStream(localStream);
                 })
                 .catch(function (e) {
@@ -199,51 +202,28 @@
         function
         call(whoid) {
 
-            // pc2.oniceconnectionstatechange = function (e) {   trace("pc2 onicecandidate
-            // state change");   onIceStateChange(pc2, e); };
-
-            trace('Added local stream to pc1');
-            trace('pc1 createOffer start');
-            pc1
-                .createOffer(offerOptions)
-                .then(function (desc) {
-                    trace('pc1 setLocalDescription start');
-
-                    // console.log("发送", JSON.stringify({option: "call", to: whoid}))
-                    // socket.send(JSON.stringify({option: "call", to: whoid}));
-
-                    pc1
-                        .setLocalDescription(desc)
-                        .then(function () {
-                            onSetLocalSuccess(pc1);
-                            console.log(desc);
-                            socket.send(JSON.stringify({
-                                option: 'call',
-                                to: whoid,
-                                data: pc1.localDescription
-                            }))
-                        }, onSetSessionDescriptionError);
-                }, onCreateSessionDescriptionError);
+            socket.send(JSON.stringify({
+                option: 'call',
+                to: whoid,
+            }));
         }
 
 
 
         function
         onCreateSessionDescriptionError(error) {
-            trace('Failed to create session description: ' + error.toString());
+            trace('创建 会话描述信息 失败: ' + error.toString());
         }
 
-        function
-        onIceCandidate(pc, event) {}
 
         function
         onAddIceCandidateSuccess(pc) {
-            trace('pc1 ' + ' addIceCandidate success');
+            trace('pc1 ' + ' 添加ICE 候选信息 成功 ');
         }
 
         function
         onAddIceCandidateError(pc, error) {
-            trace('pc1 ' + ' failed to add ICE Candidate: ' + error.toString());
+            trace('pc1 ' + ' 添加ICE 候选信息 失败 : ' + error.toString());
         }
 
         function
@@ -264,9 +244,11 @@
         function
         hangup() {
             trace('Ending call');
-            pc1.close();
-
-            pc1 = null;
+            if (pc1) {
+                pc1.close();
+                pc1 = null;
+               
+            }
 
         }
 
@@ -292,7 +274,7 @@
         // websocket收到消息
         function
         onChannelMessage(message) {
-            console.log("收到信息 : " + message.data);
+            console.log("收到WebSocket信息 : " + message.data);
             processSignalingMessage(message.data); //建立视频连接
         }
 
@@ -301,11 +283,35 @@
         processSignalingMessage(message) {
             var msg = JSON.parse(message);
             if (msg.option === "agree") {
-                trace('对方已同意通话');
-                pc1.setRemoteDescription(new RTCSessionDescription(msg.data));
 
-            } else if (msg.option === "bye") {
+                trace('createOffer 开始');
 
+                start().then(function () {
+                    pc1
+                        .createOffer(offerOptions)
+                        .then(function (desc) {
+                            trace('设置 本地描述信息 开始');
+
+                            pc1
+                                .setLocalDescription(desc)
+                                .then(function () {
+                                    onSetLocalSuccess(pc1);
+                                    console.log(desc);
+                                    trace('发送 本地描述信息 给 远程');
+                                    socket.send(JSON.stringify({
+                                        option: 'message',
+                                        data: {
+                                            type: 'offer',
+                                            data: pc1.localDescription
+                                        }
+                                    }))
+                                }, onSetSessionDescriptionError);
+                        }, onCreateSessionDescriptionError);
+                });
+
+
+            } else if (msg.option === "sorry") {
+                alert('对方正忙，不方便接听您的通话。');
             } else if (msg.option === "be_hangup ") {
                 hangup()
                 alert(msg.message);
@@ -324,9 +330,42 @@
             } else if (msg.option === "message") {
                 console.log("收到message消息");
                 if (msg.data.type === "candidate") {
-                    trace('收到验证消息：', msg.data);
-                    var candidate = new RTCIceCandidate(msg.data.data);
-                    pc1.addIceCandidate(candidate);
+                    console.log('收到IEC候选消息：', msg.data);
+
+                    pc1.addIceCandidate(new RTCIceCandidate(msg.data.data));
+                } else if (msg.data.type === 'offer') {
+                    trace('收到 远程描述信息  offer');
+                    pc1
+                        .setRemoteDescription(new RTCSessionDescription(msg.data.data))
+                        .then(function () {
+                            trace("设置 远程描述信息 成功");
+                            pc1
+                                .createAnswer(pc1.remoteDescription)
+                                .then(function (desc) {
+                                    trace('createAnser 本地描述信息:\n' + desc.sdp);
+
+                                    pc1
+                                        .setLocalDescription(desc)
+                                        .then(function () {
+                                            trace('发送 本地描述信息 回答');
+                                            socket.send(JSON.stringify({
+                                                option: "message",
+                                                data: {
+                                                    type: 'answer',
+                                                    data: pc1.localDescription
+                                                }
+                                            }));
+                                        })
+
+                                }, onCreateSessionDescriptionError);
+                        }, onSetSessionDescriptionError);
+
+
+                } else if (msg.data.type === 'answer') {
+                    trace('收到 远程描述信息 回答');
+                    pc1.setRemoteDescription(new RTCSessionDescription(msg.data.data)).then(function () {
+                        trace('设置 远程描述信息 成功');
+                    });
                 }
             } else if (msg.option == "requestLink") {
 
@@ -334,40 +373,15 @@
                 var choice = confirm('用户向您请求通话，是否接听？');
 
                 if (choice) {
-                    //选择接听通话
+                    //选择接听通话，启动本地建立PeerConnection连接。
+                    start().then(function () {
 
-                    start();
-                    //启动本地建立PeerConnection连接。
+                        socket.send(JSON.stringify({
+                            option: "answer",
+                            request: 'ok',
+                        }));
+                    });
 
-                    pc1
-                        .setRemoteDescription(new RTCSessionDescription(msg.data))
-                        .then(function () {
-                            trace("set remote Description success");
-                        }, onSetSessionDescriptionError);
-                    trace('收到通话请求');
-                    // Since the 'remote' side has no media stream we need to pass in the right
-                    // constraints in order for it to accept the incoming offer of audio and video.
-
-
-                    pc1
-                        .createAnswer(pc1.remoteDescription)
-                        .then(function (desc) {
-                            trace('Answer from pc2:\n' + desc.sdp);
-                            trace('pc2 setLocalDescription start');
-
-
-                            pc1
-                                .setLocalDescription(desc)
-                                .then(function () {
-                                    console.log("回答通话请求");
-                                    socket.send(JSON.stringify({
-                                        option: "answer",
-                                        request: 'ok',
-                                        data: pc1.localDescription
-                                    }));
-                                })
-
-                        }, onCreateSessionDescriptionError);
                 } else {
                     //不接听电话
                     socket.send(JSON.stringify({
@@ -404,17 +418,17 @@
 
         function
         onSetLocalSuccess(pc) {
-            trace('pc1 ' + ' setLocalDescription complete');
+            trace('pc1 ' + ' 设置本地描述信息完成。');
         }
 
         function
         onSetRemoteSuccess(pc) {
-            trace('pc1 ' + ' setRemoteDescription complete');
+            trace('pc1 ' + ' 设置远程描述信息完成');
         }
 
         function
         onSetSessionDescriptionError(error) {
-            trace('Failed to set session description: ' + error.toString());
+            trace('设置会话信息失败: ' + error.toString());
         }
     </script>
 
@@ -551,7 +565,7 @@
         }
 
         function userOffline(data) {
-              var $el = $('#user-group').find('[data-uid="' + data.id + '"]');
+            var $el = $('#user-group').find('[data-uid="' + data.id + '"]');
             $.each($el, function (index, el) {
                 $(el).find('.badge').removeClass('bg-green');
             })
