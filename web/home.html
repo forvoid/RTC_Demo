@@ -10,9 +10,9 @@
     <script src="ext\pintuer\pintuer.js"></script>
     <script src="path.js"></script>
     <style lang="">
-        .video {
+        /*.video {
             background-color: cyan;
-        }
+        }*/
 
         video {
             display: inline-block;
@@ -53,18 +53,18 @@
         <div class="left x8 padding-large">
             <div class="line">
                 <p class="bg-blue bg-inverse padding">
-                    剩余余额：<span class="badge bg-white" id="balance">18</span>元
+                    剩余余额：<span class="badge bg-white" id="balance">?</span>元
                 </p>
             </div>
-            <div class="line">
+            <div id="video-box" class="line" style="display:none;">
                 <div class="video x9 ">
                     <video src="" id="remoteVideo" autoplay style="width:100%;height:100%;"></video>
                     <div class="line text-center">
-                        <h1>当前无人通话</h1>
+                        <h1>与 <span id="com-user-name">???</span>通话中 </h1>
                         <button class="button">
                     静音
                 </button>
-                        <button class="button" id='hangup-btn'>
+                        <button class="button bg-red" id='hangup-btn'>
                     挂断
                 </button>
                     </div>
@@ -141,6 +141,9 @@
 
         function
         start() {
+
+            //显示视频界面 
+            showVideoBox();
 
             pc1 = new RTCPeerConnection(servers);
             pc1.onicecandidate = function (event) {
@@ -243,11 +246,18 @@
 
         function
         hangup() {
+            hideVideoBox();
+            $('#localVideo')[0].src = "";
+            $('#remoteVideo')[0].src = "";
+
+            remoteStream = null;
+            localStream = null;
+
             trace('Ending call');
             if (pc1) {
                 pc1.close();
                 pc1 = null;
-               
+
             }
 
         }
@@ -312,7 +322,7 @@
 
             } else if (msg.option === "sorry") {
                 alert('对方正忙，不方便接听您的通话。');
-            } else if (msg.option === "be_hangup ") {
+            } else if (msg.option === "be_hangup") {
                 hangup()
                 alert(msg.message);
             } else if (msg.option === "option1") {
@@ -340,7 +350,7 @@
                         .then(function () {
                             trace("设置 远程描述信息 成功");
                             pc1
-                                .createAnswer(pc1.remoteDescription)
+                                .createAnswer()
                                 .then(function (desc) {
                                     trace('createAnser 本地描述信息:\n' + desc.sdp);
 
@@ -368,12 +378,13 @@
                     });
                 }
             } else if (msg.option == "requestLink") {
+               
 
-
-                var choice = confirm('用户向您请求通话，是否接听？');
+                var choice = confirm('用户 ['+msg.from+'] 向您请求通话，是否接听？');
 
                 if (choice) {
                     //选择接听通话，启动本地建立PeerConnection连接。
+                    $('#com-user-name').text(msg.from);
                     start().then(function () {
 
                         socket.send(JSON.stringify({
@@ -531,6 +542,10 @@
             if (_call) {
 
                 var uid = $(this).data('uid');
+                var name = $(this).text();
+                //给通话命名
+                $('#com-user-name').text(name);
+
                 start(); //本地建立PeerConnection
                 call(uid);
             } else {
@@ -587,9 +602,13 @@
             doHangup();
         })
 
-        /**
-         *   WebSocket Stuff
-         */
+        function showVideoBox() {
+            $('#video-box').fadeIn();
+        }
+
+        function hideVideoBox() {
+            $('#video-box').fadeOut();
+        }
     </script>
 </body>
 

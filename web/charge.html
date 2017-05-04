@@ -46,9 +46,19 @@
                     <div class="panel-head">话费充值记录</div>
                     <div class="panel-body">
                         <ul id="user-group" class="list-group">
-                            <li><a href="javascript:void 0;"><span class="icon icon-user"></span>sdfwae</a></li>
-                            <li><a href="javascript:void 0;">sdfwae</a></li>
+                            <li><span class="icon-asterisk rotate text-large"></span>载入中。。。</li>
                         </ul>
+                        <div class="seprate margin-top margin-bottom text-center" id="div-pagin" style="display:none">
+                            <ul class="pagination pagination-group" id="pagination">
+                                <li class="disabled"><a href="#">«</a> </li>
+                                <li><a href="#">1</a> </li>
+                                <li class="active"><a href="#">2</a> </li>
+                                <li><a href="#">3</a> </li>
+                                <li><a href="#">4</a> </li>
+                                <li><a href="#">5</a> </li>
+                                <li><a href="#">»</a> </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,11 +97,13 @@
                 withCredentials: true
             }
         });
-                $('#signout').click(function(){
-            $.getJSON(getURL('logout'),function(resp){
+        $.pagetotal = 1
+        $.perpage = 30;
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
                 console.log(resp);
-                if(resp.code ==0){
-                   window.location.href='./index.html';
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
                 };
 
             })
@@ -108,7 +120,7 @@
             $('#top-username').text(user.realname);
 
             updateBalance(uid);
-            chargeRecords(uid);
+            getpage(1);
         });
 
         $('#docharge').click(function () {
@@ -124,11 +136,11 @@
                 } else {
                     $.getJSON(getURL('charge'), {
                         uid: $.user.id,
-                        createid:$.user.id,
-                        money:num
-                    },function(resp){
+                        createid: $.user.id,
+                        money: num
+                    }, function (resp) {
                         console.log(resp);
-                        if(resp.code ==0){
+                        if (resp.code == 0) {
                             alert('充值成功！');
                             window.location.reload();
                         }
@@ -139,27 +151,6 @@
                 $('#chargeNumber').focus();
             }
         })
-
-        function chargeRecords(uid) {
-            //获得用户已加入的群组
-            $.getJSON(getURL('chargeRecord'), {
-                uid: uid,
-                page: 1,
-                row: 10
-            }, function (resp) {
-                console.log(resp);
-                return;
-                var list = resp.data;
-                var html = "";
-                list.forEach(function (element) {
-                    html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
-                        '"><span class="icon icon-reorder"></span>' +
-                        element.name + '</a></li>';
-                }, this);
-
-                $('#user-group').html(html);
-            })
-        };
 
 
         function updateBalance(uid) {
@@ -175,6 +166,93 @@
                     alert(resp.messsage)
                 }
             })
+        };
+
+        function getpage(page) {
+            $.currentpage = page;
+            $.getJSON(getURL('chargeRecord'), {
+                uid: $.user.id,
+                page: page,
+                row: $.perpage
+            }, function (resp) {
+
+                console.log(resp);
+                if (resp.code != 0) {
+                    alert(resp.message)
+                } else {
+                    var pages = Math.ceil(resp.size / $.perpage);
+                    $.pages = pages;
+                    showPagination(page)
+                    fillRecord(resp.data);
+                }
+
+            })
+        }
+
+        function showPagination(page) {
+            var display = 10;
+            var leftStart = (page - Math.floor(display / 2));
+            var rightEnd = (page + Math.ceil(display / 2));
+
+            var last = '<li ' + (page == 1 ? ' class="disabled"' : "") + '><a href="javascript:;">«</a> </li>';
+            var next = '<li ' + (page == $.pages ? ' class="disabled"' : "") + '><a href="#">»</a> </li>';
+
+            var meddle = "";
+
+            if ($.pages != 1) {
+                $('#div-pagin').show();
+
+                if (leftStart < 1) {
+                    for (var i = 1; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                    for (var i = leftStart; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                }
+
+                meddle += '<li class="active"><a href="#">' + page + '</a> </li>';
+
+                if (rightEnd >= $.pages) {
+                    for (var i = page + 1; i <= $.pages; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    for (var i = page + 1; i < rightEnd; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                }
+
+
+                $('#pagination').html(last + meddle + next);
+
+            } else {
+                $('#div-pagin').hide();
+            }
+        }
+        $('#pagination').on('click', 'a', function () {
+            var $a = $(this);
+            var txt = $a.text();
+            if (/^\d+$/.test(txt)) {
+                getpage(Number(txt));
+            }
+            console.log($a.text());
+        });
+
+        function fillRecord(list) {
+
+            var html = "";
+            list.forEach(function (element) {
+                var when = (new Date(element.inserttime)).toLocaleString();
+                var money = element.money;
+                html += '<li><span class="icon icon-circle"></span> ' +
+                    when + ' 充值了 ' + money + ' 元</li>';
+            }, this);
+
+            $('#user-group').html(html);
         };
     </script>
 </body>

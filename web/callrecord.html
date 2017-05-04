@@ -13,7 +13,7 @@
 
 <body>
     <div class="layout bg-black bg-inverse hidden-l">
-       <div class="container-layout height-big">
+        <div class="container-layout height-big">
             <span class="float-right">
             <a href="javascript:;" id="signout">注销</a> 
             </span>欢迎<span id="top-username"></span>
@@ -48,6 +48,20 @@
                         <ul id="user-group" class="list-group">
                             <li><span class="icon-asterisk rotate text-large"></span>载入中。。。</li>
                         </ul>
+                        <div class="seprate margin-top margin-bottom text-center" id="div-pagin" style="display:none">
+
+                            <ul class="pagination pagination-group" id="pagination">
+                                <li class="disabled"><a href="#">«</a> </li>
+                                <li><a href="#">1</a> </li>
+                                <li class="active"><a href="#">2</a> </li>
+                                <li><a href="#">3</a> </li>
+                                <li><a href="#">4</a> </li>
+                                <li><a href="#">5</a> </li>
+                                <li><a href="#">»</a> </li>
+                            </ul>
+
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -61,12 +75,12 @@
             }
         });
         $.pagetotal = 1
-        $.perpage = 20;
-        $('#signout').click(function(){
-            $.getJSON(getURL('logout'),function(resp){
+        $.perpage = 30;
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
                 console.log(resp);
-                if(resp.code ==0){
-                   window.location.href='./index.html';
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
                 };
 
             })
@@ -79,11 +93,16 @@
             var uid = user.id;
 
             $.user = user;
-              $('#top-username').text(user.realname);
+            $('#top-username').text(user.realname);
             console.log(result);
+            getpage(1);
+        });
+
+        function getpage(page) {
+            $.currentpage = page;
             $.getJSON(getURL('callRecord'), {
-                uid: uid,
-                page: 1,
+                uid: $.user.id,
+                page: page,
                 row: $.perpage
             }, function (resp) {
 
@@ -91,19 +110,76 @@
                 if (resp.code != 0) {
                     alert(resp.message)
                 } else {
-
+                    var pages = Math.ceil(resp.size / $.perpage);
+                    $.pages = pages;
+                    showPagination(page)
+                    fillRecord(resp.data);
                 }
 
             })
+        }
+
+        function showPagination(page) {
+            var display = 10;
+            var leftStart = (page - Math.floor(display / 2));
+            var rightEnd = (page + Math.ceil(display / 2));
+
+            var last = '<li ' + (page == 1 ? ' class="disabled"' : "") + '><a href="javascript:;">«</a> </li>';
+            var next = '<li ' + (page == $.pages ? ' class="disabled"' : "") + '><a href="#">»</a> </li>';
+
+            var meddle = "";
+
+            if ($.pages != 1) {
+                $('#div-pagin').show();
+
+                if (leftStart < 1) {
+                    for (var i = 1; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                    for (var i = leftStart; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                }
+
+                meddle += '<li class="active"><a href="#">' + page + '</a> </li>';
+
+                if (rightEnd >= $.pages) {
+                    for (var i = page + 1; i <= $.pages; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    for (var i = page + 1; i < rightEnd; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                }
+
+
+                $('#pagination').html(last + meddle + next);
+
+            } else {
+                $('#div-pagin').hide();
+            }
+        }
+        $('#pagination').on('click', 'a', function () {
+            var $a = $(this);
+            var txt = $a.text();
+            if (/^\d+$/.test(txt)) {
+                getpage(Number(txt));
+            }
+            console.log($a.text());
         });
 
         function fillRecord(list) {
-          
+
             var html = "";
             list.forEach(function (element) {
-                html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
-                    '"><span class="icon icon-reorder"></span>' +
-                    element.name + '</a></li>';
+                var when = (new Date(element.starttime)).toLocaleString();
+                var howlong = element.length;
+                html += '<li><span class="icon icon-circle"></span> ' +
+                    when + ' 打给' + element.towho + '通话时长：' + howlong + '</li>';
             }, this);
 
             $('#user-group').html(html);
