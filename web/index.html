@@ -87,7 +87,7 @@
             }
         });
 
-       
+
         $(function () {
             $("#submit").click(function () {
                 var username = $('#username').val();
@@ -102,12 +102,16 @@
                         password: password
                     }, function (result, xx) {
 
+                        console.log(result);
                         if (result.code != 0) {
                             alert(result.message);
                         } else {
-                            window.location = './home.html';
+                            if (username=='root') {
+                                window.location.href = './boudle.html';
+                            } else {
+                                window.location = './home.html';
+                            }
                         }
-                        console.log(result);
                     });
                 }
 

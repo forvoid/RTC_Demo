@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by forvoid on 4/18/2017.
+ * 用户管理
  */
 public class UserinfoAction extends com.opensymphony.xwork2.ActionSupport {
     private HttpSession session;

@@ -1,9 +1,11 @@
 function getURL(action) {
-  var host = "https://forvoid.me:8443/RTC_Demo/";
-//   var host = "http://192.168.10.105:8080/";
+//   var host = "https://forvoid.me:8443/RTC_Demo/";
+//   var host = "http://192.168.191.3:8080/";
+    var host = "http://localhost:8080/";
 
-  var ws =  'wss://forvoid.me:8443/RTC_Demo/';
-//   var ws =  'ws://192.168.10.105:8080/';
+//   var ws =  'wss://forvoid.me:8443/RTC_Demo/';
+//   var ws =  'ws://192.168.191.3:8080/';
+    var ws =  'ws://localhost:8080/';
     var _maps = {
        
         regist: "userinfo!regist.action", //username password real name addr setmealid
@@ -33,7 +35,9 @@ function getURL(action) {
         //套餐
         getAllOption:'setmeal!findALl.action',
         optionDetail:'setmeal!findById.action',//id
-
+        
+        addOption:'setmeal!addSetmeal.action',//name,price,total,desc
+        updateOption:'setmeal!updateSetmeal.action',//name,price,total,desc
     }
 
     if(action=='ws')return ws;

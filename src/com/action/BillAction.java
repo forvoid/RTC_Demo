@@ -15,9 +15,7 @@ import org.apache.struts2.ServletActionContext;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by forvoid on 4/19/2017.
- */
+
 public class BillAction extends ActionSupport {
     private BillService billService;
     private UserinfoService userinfoService;

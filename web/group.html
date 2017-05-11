@@ -13,7 +13,7 @@
 
 <body>
     <div class="layout bg-black bg-inverse hidden-l">
-       <div class="container-layout height-big">
+        <div class="container-layout height-big">
             <span class="float-right">
             <a href="javascript:;" id="signout">注销</a> 
             </span>欢迎<span id="top-username"></span>
@@ -46,7 +46,7 @@
                     <button id="new-group" type="button" class="button bg-main">新建群组</button>
                 </div>
                 <div class="x9 form-inline">
-                 
+
                     <div class="input-inline">
                         <input type="text" class="input input-auto" size=30 placeholder="在此输入您要搜索群组的名字" id="group-text">
                         <button type="button" class="button bg-main" id="search-btn">搜索</button>
@@ -56,6 +56,7 @@
 
             <div class="line padding-top">
                 <ul id="search-result" class="list-group">
+                    <li>请在上方输入关键词查询</li>
                     <!--<li><a href="javascript:void 0;">sd</a></li>
                     <li><a href="javascript:void 0;">ddddddd</a></li>-->
                 </ul>
@@ -82,11 +83,11 @@
             }
         });
 
-                $('#signout').click(function(){
-            $.getJSON(getURL('logout'),function(resp){
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
                 console.log(resp);
-                if(resp.code ==0){
-                   window.location.href='./index.html';
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
                 };
 
             })
@@ -100,7 +101,7 @@
             var user = resp.data;
             var uid = user.id;
             $.user = user;
-              $('#top-username').text(user.realname);
+            $('#top-username').text(user.realname);
             UpdateGroup(uid);
         });
         $('#new-group').click(function (e) {
@@ -125,11 +126,17 @@
             }, function (resp) {
                 var list = resp.data;
                 var html = "";
-                list.forEach(function (element) {
-                    html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
-                        '"><span class="icon icon-reorder"></span> ' +
-                        element.name + '</a></li>';
-                }, this);
+
+                if (resp.code == 0) {
+                    list.forEach(function (element) {
+                        html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
+                            '"><span class="icon icon-reorder"></span> ' +
+                            element.name + '</a></li>';
+                    }, this);
+
+                } else {
+                    html = '<li><p>暂无数据</p></li>';
+                }
 
                 $('#user-group').html(html);
             })

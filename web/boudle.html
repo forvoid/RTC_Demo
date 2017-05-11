@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <title>套餐管理</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+  <script src="ext\pintuer\jquery.js"></script>
+  <script src="ext\pintuer\pintuer.js"></script>
+  <script src="path.js"></script>
+  <style>
+    .card {
+      width: 230px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout bg-black bg-inverse hidden-l">
+    <div class="container-layout height-big">
+      <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+    </div>
+  </div>
+  <div class="container-layout padding-big bg-green bg-inverse ">
+    <div class="line">
+      <div class="xl12 xs5 xm6 xb7">
+        <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+        <a href="#">
+          <h1>智慧科技</h1>
+        </a>
+      </div>
+      <div class="xl12 xs7 xm6 xb5 padding-small-top">
+        <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+          <li><a href="boudle.html">套餐管理</a> </li>
+          <li><a href="charge.admin.html">充值中心</a> </li>
+          <li><a href="group.admin.html">群组管理</a> </li>
+          <li><a href="profile.admin.html">账号设置</a> </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="main container padding">
+    <div class="line padding">
+      <ul class="list-inline" id="user-group">
+
+      </ul>
+
+    </div>
+  </div>
+  <div id="mydialog">
+    <div class="dialog">
+      <div class="dialog-head">
+        <span class="dialog-close close rotate-hover"></span><strong>修改套餐</strong>
+      </div>
+      <div class="dialog-body">
+        <input type="text" hidden id="option-id">
+        <div><label for="" class="label">套餐名</label><input type="text" id="option-name" class="input" placeholder="套餐名"></div>
+        <div><label for="" class="label">套餐描述</label><input type="text" id="option-desc" class="input" placeholder="描述"></div>
+        <div><label for="" class="label">单价</label><input type="text" id="option-price" class="input" placeholder="单价"></div>
+        <div><label for="" class="label">超过多少分钟后免费</label><input type="text" id="option-total" class="input" placeholder="超过多少分钟后免费"></div>
+      </div>
+      <div class="dialog-foot">
+        <button class="dialog-close button js-dialog-update ">
+			取消</button>
+        <button class="button bg-green" id="update-option-btn">
+			确认</button>
+      </div>
+    </div>
+  </div>
+  <div id="new-option-dialog">
+    <div class="dialog">
+      <div class="dialog-head">
+        <span class="dialog-close close rotate-hover"></span><strong>新增套餐</strong>
+      </div>
+      <div class="dialog-body">
+        <input type="text" hidden id="option-id-new">
+        <div><label for="" class="label">套餐名</label><input type="text" id="option-name-new" class="input" placeholder="套餐名"></div>
+        <div><label for="" class="label">套餐描述</label><input type="text" id="option-desc-new" class="input" placeholder="描述"></div>
+        <div><label for="" class="label">单价</label><input type="text" id="option-price-new" class="input" placeholder="单价"></div>
+        <div><label for="" class="label">超过多少分钟后免费</label><input type="text" id="option-total-new" class="input" placeholder="超过多少分钟后免费"></div>
+      </div>
+      <div class="dialog-foot">
+        <button class="dialog-close button js-dialog-new ">
+			取消</button>
+        <button class="button bg-green js-new-option-button">
+			确认</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    $.ajaxSetup({
+      xhrFields: {
+        withCredentials: true
+      }
+    });
+
+    $('#signout').click(function () {
+      $.getJSON(getURL('logout'), function (resp) {
+        console.log(resp);
+        if (resp.code == 0) {
+          window.location.href = './index.html';
+        };
+
+      })
+    });
+
+    $.getJSON(getURL('seeUserInfo'), function (resp) {
+      if (resp.code != 10) {
+        window.location.href = "./index.html";
+      }
+
+      console.log(resp)
+      var user = resp.data;
+      var uid = user.id;
+      $.user = user;
+      $('#top-username').text(user.realname);
+      UpdateVundle(uid);
+    });
+
+
+    function UpdateVundle(uid) {
+      //获得用户已加入的群组
+      $.getJSON(getURL('getAllOption'), {
+        uid,
+        uid
+      }, function (resp) {
+        var list = resp.data;
+        $.optionlist = list;
+
+        var html = "";
+        list.forEach(function (element) {
+          html += '<li><div class="card border border-mix bg-mix radius padding-small"><h1 class="op-name">' +
+            element.name +
+            '</h1><p >单价: <span class="op-price">' + element.price + '</span> 元(当前套餐<span class="op-total">' +
+            element.total + '</span>分钟后免费)</p><p class="op-desc">' +
+            element.desc +
+            '</p><p><button class="button bg-blue changeOption dialogs" data-toggle="click" data-target="#mydialog" data-mask="1" data-width="50%" href="#" data-act="update" data-oid="' +
+            element.id + '">修改</button>' +
+            '</p></div>' + '</li>';
+        }, this);
+        //添加新套餐按钮
+        html +=
+          '<li><p><button class="button bg-blue newOption dialogs" data-toggle="click" data-target="#new-option-dialog" data-mask="1" data-width="50%" href="#" data-act="new">新增套餐</button>' +
+          '</p></div>' + '</li>';
+        $('#user-group').html(html);
+      })
+    }
+
+   
+
+    $('#user-group').on('click', 'button', function (e) {
+      var btn = $(this);
+      var oid = btn.data('oid');
+      var act = btn.data('act');
+      if (act == 'update') {
+        $showdialogs(btn);
+        var opt_li = btn.parent().parent();
+        var opt_name = opt_li.find('.op-name').text();
+        var opt_desc = opt_li.find('.op-desc').text();
+        var opt_total = opt_li.find('.op-total').text();
+        var opt_price = opt_li.find('.op-price').text();
+        showDailog(oid, opt_name, opt_desc, opt_price, opt_total);
+      } else if (act == 'new') {
+        $showdialogs(btn);
+        showNewDialog();
+      }
+
+
+    });
+
+    function showDailog(id, name, desc, price, total) {
+      // $('.dialog').addClass('open');
+      $('#option-id').val(id);
+      $('#option-name').val(name);
+      $('#option-desc').val(desc);
+      $('#option-price').val(price);
+      $('#option-total').val(total);
+
+
+      $('#update-option-btn').off().click(function () {
+
+        var id = $('#option-id').val();
+        var name = $('#option-name').val();
+        var desc = $('#option-desc').val();
+        var price = $('#option-price').val();
+        var total = $('#option-total').val();
+
+
+        $.getJSON(getURL('updateOption'), {
+          id: id,
+          name: name,
+          desc: desc,
+          price: price,
+          total: total
+        }, function (resp) {
+          if (resp.code == 0) {
+            UpdateVundle($.user.id);
+            alert('修改成功！');
+            $('.js-dialog-update').click();
+          } else {
+            alert(resp.message);
+            $('.js-dialog-update').click();
+          }
+        })
+
+      })
+    };
+
+    function showNewDialog() {
+      $('.js-new-option-button').off().click(function () {
+
+        var id = $('#option-id-new').val();
+        var name = $('#option-name-new').val();
+        var desc = $('#option-desc-new').val();
+        var price = $('#option-price-new').val();
+        var total = $('#option-total-new').val();
+
+
+        $.getJSON(getURL('addOption'), {
+          name: name,
+          desc: desc,
+          price: price,
+          total: total
+        }, function (resp) {
+          if (resp.code == 0) {
+            UpdateVundle($.user.id);
+            alert('修改成功！');
+            $('.js-dialog-new').click();
+          } else {
+            alert(resp.message);
+            $('.js-dialog-new').click();
+          }
+        })
+
+      })
+    }
+  </script>
+</body>
+
+</html>

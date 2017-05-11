@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * 话费管理
- * Created by forvoid on 4/19/2017.
+ *
  */
 public class BillDao extends HibernateDaoSupport {
     private Recharge recharge;
@@ -34,7 +34,7 @@ public class BillDao extends HibernateDaoSupport {
             String queryString = "from Records as model where model.uid= ?";
              Query query = getSession().createQuery(queryString);
             query.setParameter(0, uid);
-            query.setMaxResults((page-1)*row+row);
+            query.setMaxResults(row);
             query.setFirstResult((page-1)*row);
             return query.list();
 //                    getHibernateTemplate().find(queryString, uid);
@@ -59,7 +59,7 @@ public class BillDao extends HibernateDaoSupport {
             String queryString = "from Recharge as model where model.uid= ?";
             Query query = getSession().createQuery(queryString);
             query.setParameter(0, uid);
-            query.setMaxResults((page-1)*row+row);
+            query.setMaxResults(row);
             query.setFirstResult((page-1)*row);
             return query.list();
         } catch (RuntimeException re) {

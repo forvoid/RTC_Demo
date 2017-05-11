@@ -15,7 +15,8 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
- * Created by forvoid on 4/18/2017.
+ *
+ * 用户群组管理
  */
 public class GroupAction extends ActionSupport{
     private HttpSession session;

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>充值中心</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+        <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="boudle.html">套餐管理</a> </li>
+                    <li><a href="charge.admin.html">充值中心</a> </li>
+                    <li><a href="group.admin.html">群组管理</a> </li>
+                    <li><a href="profile.admin.html">账号设置</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="left x8 padding-large">
+            <div class="line">
+                <div class="panel">
+                    <div class="panel-head">话费充值记录</div>
+                    <div class="panel-body">
+                        <div>
+                            <p class="input-inline"><input type="text" class="input" id="search-userid" placeholder="请输入用户的ID"><button class="button"
+                                    id='search-user-btn'>查询</button></p>
+                        </div>
+                        <ul id="user-group" class="list-group">
+                            <li>请输入用户id查询</li>
+                        </ul>
+                        <div class="seprate margin-top margin-bottom text-center" id="div-pagin" style="display:none">
+                            <ul class="pagination pagination-group" id="pagination">
+                                <li class="disabled"><a href="#">«</a> </li>
+                                <li><a href="#">1</a> </li>
+                                <li class="active"><a href="#">2</a> </li>
+                                <li><a href="#">3</a> </li>
+                                <li><a href="#">4</a> </li>
+                                <li><a href="#">5</a> </li>
+                                <li><a href="#">»</a> </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right x4 padding-large">
+
+            <div class="panel">
+                <div class="panel-head">
+                    话费充值
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <label for="" class="label">请输入充值的用户ID</label>
+                        <input type="text" class="input" id="chargeid">
+                    </p>
+                    <p>
+                        <label for="" class="label">请输入充值金额</label>
+                        <input type="text" class="input" id="chargeNumber">
+                    </p>
+                    <p class="text-center"><button class="button bg-main" id="docharge">充值</button></p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+        $.pagetotal = 1
+        $.perpage = 30;
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
+                };
+
+            })
+        });
+        $.getJSON(getURL('seeUserInfo'), function (result) {
+            if (result.code != 10) {
+                window.location.href = './index.html';
+            }
+            var user = result.data;
+            var uid = user.id;
+
+            $.user = user;
+            console.log(result);
+            $('#top-username').text(user.realname);
+
+
+            //getpage(23,1);
+        });
+        $('#search-user-btn').click(function () {
+            var uid = $('#search-userid').val().trim();
+            if (uid == '') {
+                alert('请输入正确的用户ID!');
+            } else {
+                $.user_id = uid;
+                getpage(1);
+            }
+        })
+        $('#docharge').click(function () {
+            var num = $('#chargeNumber').val().trim();
+            var uid = $('#chargeid').val().trim();
+            console.log(num);
+            if(uid == ''){
+                alert('请输入正确的用户ID~');
+                return ;
+            }
+            if (/^\d\d*$/gim.test(num)) {
+                if (num <= 0) {
+                    alert('不能为负数！');
+                    $('#chargeNumber').focus();
+                } else if (num > 200) {
+                    alert('一次充值金额不能超过200！');
+                    $('#chargeNumber').focus();
+                } else {
+                    $.getJSON(getURL('charge'), {
+                        uid:uid,
+                        createid: $.user.id,
+                        money: num
+                    }, function (resp) {
+                        console.log(resp);
+                        if (resp.code == 0) {
+                            alert('充值成功！');
+                            window.location.reload();
+                        }
+                    })
+                }
+            } else {
+                alert('请输入正确的数字！');
+                $('#chargeNumber').focus();
+            }
+        })
+
+
+
+        function getpage(page) {
+            $.currentpage = page;
+            $.getJSON(getURL('chargeRecord'), {
+                uid: $.user_id,
+                page: page,
+                row: $.perpage
+            }, function (resp) {
+
+                console.log(resp);
+                if (resp.code != 0) {
+                    $('#user-group').html('<li><p>' + resp.message + '</p></li>');
+                } else {
+                    var pages = Math.ceil(resp.size / $.perpage);
+                    $.pages = pages;
+                    showPagination(page)
+                    fillRecord(resp.data);
+                }
+
+            })
+        }
+
+        function showPagination(page) {
+            var display = 10;
+            var leftStart = (page - Math.floor(display / 2));
+            var rightEnd = (page + Math.ceil(display / 2));
+
+            var last = '<li ' + (page == 1 ? ' class="disabled"' : "") + '><a href="javascript:;">«</a> </li>';
+            var next = '<li ' + (page == $.pages ? ' class="disabled"' : "") + '><a href="#">»</a> </li>';
+
+            var meddle = "";
+
+            if ($.pages != 1) {
+                $('#div-pagin').show();
+
+                if (leftStart < 1) {
+                    for (var i = 1; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                    for (var i = leftStart; i < page; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                }
+
+                meddle += '<li class="active"><a href="#">' + page + '</a> </li>';
+
+                if (rightEnd >= $.pages) {
+                    for (var i = page + 1; i <= $.pages; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                } else {
+                    for (var i = page + 1; i < rightEnd; i++) {
+                        meddle += '<li><a href="#">' + i + '</a> </li>'
+                    }
+                    meddle += '<li class="disabled"><a href="#">...</a> </li>';
+                }
+
+
+                $('#pagination').html(last + meddle + next);
+
+            } else {
+                $('#div-pagin').hide();
+            }
+        }
+        $('#pagination').on('click', 'a', function () {
+            var $a = $(this);
+            var txt = $a.text();
+            if (/^\d+$/.test(txt)) {
+                getpage(Number(txt));
+            }
+            console.log($a.text());
+        });
+
+        function fillRecord(list) {
+
+            var html = "";
+            list.forEach(function (element) {
+                var when = (new Date(element.inserttime)).toLocaleString();
+                var money = element.money;
+                html += '<li><span class="icon icon-circle"></span> ' +
+                    when + ' 充值了 ' + money + ' 元</li>';
+            }, this);
+
+            $('#user-group').html(html);
+        };
+    </script>
+</body>
+
+</html>

@@ -55,13 +55,14 @@
                 <p class="bg-blue bg-inverse padding">
                     剩余余额：<span class="badge bg-white" id="balance">?</span>元
                 </p>
+                <audio id="music-ring" loop preload="true" src="./ring.mp3"></audio>
             </div>
             <div id="video-box" class="line" style="display:none;">
                 <div class="video x9 ">
                     <video src="" id="remoteVideo" autoplay style="width:100%;height:100%;"></video>
                     <div class="line text-center">
                         <h1>与 <span id="com-user-name">???</span>通话中 </h1>
-                        <button class="button">
+                        <button class="button" id="mute-btn">
                     静音
                 </button>
                         <button class="button bg-red" id='hangup-btn'>
@@ -96,7 +97,27 @@
             </div>
         </div>
     </div>
+    <div style="display: none;">
+        <button class="button bg-blue newOption dialogs" data-toggle="click" data-target="#mydialog" data-mask="1" data-width="50%"
+            href="#" id="open-dialog-btn">open</button>
+    </div>
+    <div id="mydialog">
+        <div class="dialog">
 
+            <div class="dialog-body">
+                <h1 class="text-center">用户 [<span id="dialog-text-username">??</span>] 请求与您通话</h1>
+            </div>
+
+            <div class="dialog-foot">
+                <div class="text-center">
+                    <button class="dialog-close button bg-red js-dialog-close">
+			拒绝</button>
+                    <button class="button bg-green js-dialog-yes">
+			同意通话</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="./ext/adapter-latest.js"></script>
     <script>
         function trace(arg) {
@@ -111,7 +132,7 @@
         var startTime;
         var localVideo = document.getElementById('localVideo');
         var remoteVideo = document.getElementById('remoteVideo');
-
+        var music = document.getElementById('music-ring');
         remoteVideo.onresize = function () {
             trace('Remote video size changed to ' + remoteVideo.videoWidth + 'x' + remoteVideo.videoHeight);
             // We'll use the first onsize callback as an indication that video has started
@@ -336,7 +357,12 @@
             } else if (msg.option === "offline") {
                 userOffline(msg.data);
             } else if (msg.option === "allGroup") {
-                updateGroup(msg.data)
+                if (msg.code == 0) {
+
+                    updateGroup(msg.data)
+                } else {
+                    $('#user-group').html('<li><p>' + msg.message + '</p></li>');
+                }
             } else if (msg.option === "message") {
                 console.log("收到message消息");
                 if (msg.data.type === "candidate") {
@@ -378,28 +404,57 @@
                     });
                 }
             } else if (msg.option == "requestLink") {
-               
+                music.currentTime = 0;
+                music.play();
+                var makechoice = false;
+                $('#open-dialog-btn').click();
+                $('#dialog-text-username').text(msg.from);
+                $('.dialog-mask').click(function(e){
+                    if(makechoice){
 
-                var choice = confirm('用户 ['+msg.from+'] 向您请求通话，是否接听？');
+                    }else{
+                        e.cancelBubble=true;
+                        e.stopPropagation();
+                        return false;
+                    }
+                });
+                $('.js-dialog-close').click(function () {
+                    if (makechoice) {
+                        //什么也不做
+                    } else {
+                        reply(false);
+                        makechoice = true;
+                    }
+                });
+                $('.js-dialog-yes').click(function () {
+                    reply(true);
+                    makechoice = true;
+                    $('.dialog-close').click();
+                });
 
-                if (choice) {
-                    //选择接听通话，启动本地建立PeerConnection连接。
-                    $('#com-user-name').text(msg.from);
-                    start().then(function () {
+                function reply(choice) {
 
+                    music.pause();
+                    if (choice) {
+                        //选择接听通话，启动本地建立PeerConnection连接。
+                        $('#com-user-name').text(msg.from);
+                        start().then(function () {
+
+                            socket.send(JSON.stringify({
+                                option: "answer",
+                                request: 'ok',
+                            }));
+                        });
+
+                    } else {
+                        //不接听电话
                         socket.send(JSON.stringify({
                             option: "answer",
-                            request: 'ok',
+                            request: 'sorry',
                         }));
-                    });
-
-                } else {
-                    //不接听电话
-                    socket.send(JSON.stringify({
-                        option: "answer",
-                        request: 'sorry',
-                    }));
+                    };
                 }
+
 
 
 
@@ -600,7 +655,20 @@
 
         $('#hangup-btn').click(function () {
             doHangup();
-        })
+        });
+
+        $('#mute-btn').click(function () {
+            var $btn = $(this);
+            if ($btn.data('mute')) {
+                $btn.data('mute', 0);
+                $btn.text('静音');
+                remoteVideo.volume = 1;
+            } else {
+                $btn.text('关闭静音');
+                remoteVideo.volume = 0;
+                $btn.data('mute', 1);
+            }
+        });
 
         function showVideoBox() {
             $('#video-box').fadeIn();

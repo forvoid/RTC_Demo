@@ -17,10 +17,10 @@
 			value="com.mysql.jdbc.Driver">
 		</property>
 		<property name="url"
-			value="jdbc:mysql://60.205.217.40:3306/dianxin?useUnicode=true&amp;characterEncoding=UTF-8">
+			value="jdbc:mysql://localhost:3306/dianxin?useUnicode=true&amp;characterEncoding=UTF-8">
 		</property>
 		<property name="username" value="root"></property>
-		<property name="password" value="hiyouth_3"></property>
+		<property name="password" value="root"></property>
 	</bean>
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">

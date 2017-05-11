@@ -156,7 +156,7 @@
         function updateBalance(uid) {
 
             $.getJSON(getURL('queary'), {
-                uid,
+                uid:
                 uid
             }, function (resp) {
                 console.log(resp);
@@ -178,7 +178,7 @@
 
                 console.log(resp);
                 if (resp.code != 0) {
-                    alert(resp.message)
+                    $('#user-group').html('<li><p>' + resp.message + '</p></li>');
                 } else {
                     var pages = Math.ceil(resp.size / $.perpage);
                     $.pages = pages;

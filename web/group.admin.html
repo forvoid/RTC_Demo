@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <title>群组管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="ext\pintuer\pintuer.css">
+    <script src="ext\pintuer\jquery.js"></script>
+    <script src="ext\pintuer\pintuer.js"></script>
+    <script src="path.js"></script>
+</head>
+
+<body>
+    <div class="layout bg-black bg-inverse hidden-l">
+        <div class="container-layout height-big">
+            <span class="float-right">
+            <a href="javascript:;" id="signout">注销</a> 
+            </span>欢迎<span id="top-username"></span>
+        </div>
+    </div>
+    <div class="container-layout padding-big bg-green bg-inverse ">
+        <div class="line">
+            <div class="xl12 xs5 xm6 xb7">
+                <button class="button icon-navicon float-right" data-target="#header-demo1">
+            </button>
+                <a href="#">
+                    <h1>智慧科技</h1>
+                </a>
+            </div>
+            <div class="xl12 xs7 xm6 xb5 padding-small-top">
+                <ul class="nav nav-menu nav-inline nav-navicon" id="header-demo1">
+                    <li><a href="boudle.html">套餐管理</a> </li>
+                    <li><a href="charge.admin.html">充值中心</a> </li>
+                    <li><a href="group.admin.html">群组管理</a> </li>
+                    <li><a href="profile.admin.html">账号设置</a> </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main container padding">
+        <div class=" padding">
+            <div class="line">
+                <div class="x3">
+                    <button id="new-group" type="button" class="button bg-main">新建群组</button>
+                </div>
+                <div class="x9 form-inline">
+
+                    <div class="input-inline">
+                        <input type="text" class="input input-auto" size=30 placeholder="在此输入您要搜索群组的名字" id="group-text">
+                        <button type="button" class="button bg-main" id="search-btn">搜索</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="line padding-top">
+                <ul id="search-result" class="list-group">
+                    <li>请在上方输入关键词查询</li>
+                    <!--<li><a href="javascript:void 0;">sd</a></li>
+                    <li><a href="javascript:void 0;">ddddddd</a></li>-->
+                </ul>
+            </div>
+        </div>
+        <!--<div class="x4">
+            <div class="panel">
+                <div class="panel-head">已加入的群组</div>
+                <div class="panel-body">
+                    <ul id="user-group" class="list-group">
+                        <li><span class="icon-asterisk rotate text-large"></span>载入中。。。</li>
+                        <!--<li><a href="javascript:void 0;">sdfwae</a></li>
+                        <li><a href="javascript:void 0;">sdfwae</a></li>-->
+        <!--</ul>-->
+        <!--</div>-->
+        <!--</div>-->
+
+        <!--</div>-->
+    </div>
+
+    <div id="mydialog">
+        <div class="dialog">
+
+            <div class="dialog-body">
+                <ul id="user-group">
+
+                </ul>
+            </div>
+
+            <div class="dialog-foot">
+
+                <button class="button dialog-close ">
+			确定</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        $.ajaxSetup({
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        $('#signout').click(function () {
+            $.getJSON(getURL('logout'), function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    window.location.href = './index.html';
+                };
+
+            })
+        });
+        $.getJSON(getURL('seeUserInfo'), function (resp) {
+            if (resp.code != 10) {
+                window.location.href = "./index.html";
+            }
+
+            console.log(resp)
+            var user = resp.data;
+            var uid = user.id;
+            $.user = user;
+            $('#top-username').text(user.realname);
+            //UpdateGroup(uid);
+        });
+        $('#new-group').click(function (e) {
+            var name = prompt('请输入新的群组的名字');
+            if (name.trim().length == 0) return;
+            console.log(name);
+            $.getJSON(getURL('createGroup'), {
+                name: name
+            }, function (resp) {
+                console.log(resp);
+                alert(resp.message);
+            })
+
+        })
+
+        // function UpdateGroup(uid) {
+        //     //获得用户已加入的群组
+        //     $.getJSON(getURL('findGroupByUid'), {
+        //         uid,
+        //         uid
+        //     }, function (resp) {
+        //         var list = resp.data;
+        //         var html = "";
+        //         list.forEach(function (element) {
+        //             html += '<li><a href="javascript:void 0;" data-gid="' + element.gid +
+        //                 '"><span class="icon icon-reorder"></span> ' +
+        //                 element.name + '</a></li>';
+        //         }, this);
+
+        //         $('#user-group').html(html);
+        //     })
+        // }
+
+        function fillGroup(list) {
+            //填充用户列表
+            var html = "";
+            list.forEach(function (element) {
+                html += '<li><span class="icon icon-user"></span> ' +
+                    element.realname + '[id:' + element.id +
+                    ']</li>';
+            }, this);
+
+            $('#user-group').html(html);
+
+        };
+        $('#search-btn').click(function (e) {
+            var groupname = $('#group-text').val();
+            $.getJSON(getURL('findGroupByName'), {
+                name: groupname
+            }, function (resp) {
+                console.log(resp);
+                if (resp.code != 0) {
+                    $('#search-result').html('<li>' + resp.message + '</li>');
+                } else {
+                    var list = resp.data;
+                    var html = "";
+                    list.forEach(function (el) {
+                        html += '<li>' + el.name +
+                            '&nbsp;&nbsp;&nbsp;<button class="button dialogs" data-gid="' + el.id +
+                            '" data-toggle="click" data-target="#mydialog" data-mask="1" data-width="50%" >查看群组成员</button></li>'
+                    });
+                    $('#search-result').html(html);
+                }
+            })
+        });
+
+        $('#search-result').on('click', 'button', function (e) {
+            var btn = $(this);
+            var gid = btn.data('gid');
+            $.getJSON(getURL('groupMembers'), {
+                gid: gid
+            }, function (resp) {
+                console.log(resp);
+                if (resp.code == 0) {
+                    $showdialogs(btn);
+                    fillGroup(resp.data);
+                } else {
+                    alert(resp.message);
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>

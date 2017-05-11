@@ -7,7 +7,7 @@ import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import java.util.List;
 
 /**
- * Created by forvoid on 4/28/2017.
+ * Created by forvoid on 4/28/2017
  */
 public class SetmealDao extends HibernateDaoSupport {
     public void addUser(Setmeal transientInstance) {
