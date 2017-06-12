@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +34,7 @@ public class Chat {
         callService = (CallService)act.getBean("callService");
 
     }
-    public static  Map<Integer,Chat> connections =new HashMap<>();
+    public static  Map<Integer,Chat> connections =new ConcurrentHashMap<>();
 //    private static CopyOnWriteArraySet<Chat> sessions = new CopyOnWriteArraySet<TransmissionLocationWebSocket>();
 
     private Session session;
