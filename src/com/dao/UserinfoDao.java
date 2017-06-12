@@ -17,6 +17,9 @@ public class UserinfoDao extends HibernateDaoSupport {
             getHibernateTemplate().save(transientInstance);
         } catch (RuntimeException re) {
             re.printStackTrace();
+            String a ="fafa";
+            char[] b= a.toCharArray();
+            String c = String.valueOf(b);
         }
     }
 

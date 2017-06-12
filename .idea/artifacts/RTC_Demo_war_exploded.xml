@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" name="RTC_Demo:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/RTC_Demo_war_exploded</output-path>
+    <output-path>$PROJECT_DIR$/out/artifacts/RTC_Demo</output-path>
     <root id="root">
       <element id="javaee-facet-resources" facet="RTC_Demo/web/Web" />
       <element id="directory" name="WEB-INF">

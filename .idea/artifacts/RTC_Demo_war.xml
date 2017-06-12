@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="war" name="RTC_Demo:war">
-    <output-path>$PROJECT_DIR$/out/artifacts/RTC_Demo_war</output-path>
+    <output-path>$PROJECT_DIR$/out/artifacts/RTC_Demo</output-path>
     <root id="archive" name="RTC_Demo_war.war">
       <element id="artifact" artifact-name="RTC_Demo:war exploded" />
     </root>
